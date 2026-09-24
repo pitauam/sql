@@ -1,0 +1,14 @@
+COMANDOS IMPORTANTES DE UBUNTU:
+
+Si estas en la terminal y quieres abrir el File Explorer usa:
+
+xdg-open .
+
+Historial smart:
+ctrl+R
+
+Ver tablas que tienes:
+\d
+
+Vista reducida: 
+\x
