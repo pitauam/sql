@@ -12,3 +12,14 @@ Ver tablas que tienes:
 
 Vista reducida: 
 \x
+
+
+NOTAS:
+Hay que hacer una memoria explicando que hace cada consulta y la logica que hemos seguido, tambien una foto con el esquema de la bases de datos y con el codigo
+Por cada query (consulta) hay que enviar una captura del resultado y del codigo y una explicacion breve de la logica
+
+
+
+
+FORMATEADOR DE QUERYS:
+https://www.dpriver.com/pp/sqlformat.htm
