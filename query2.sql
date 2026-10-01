@@ -1,32 +1,12 @@
--- http://dpriver.com (Cumpliendo el requisito de limpieza)
-
-SELECT 
-    c.customernumber, 
-    c.customername, 
-    SUM(p.amount) AS total_pagado
-FROM 
-    customers c
--- 1. Unimos con pagos para calcular el dinero total abonado
-JOIN 
-    payments p ON c.customernumber = p.customernumber
-WHERE 
-    c.customernumber IN (
-        -- 2. Subconsulta: Buscamos qué clientes compraron ese camión específico
-        SELECT DISTINCT 
-            o.customernumber
-        FROM 
-            orders o
-        JOIN 
-            orderdetails od ON o.ordernumber = od.ordernumber
-        JOIN 
-            products pr ON od.productcode = pr.productcode
-        WHERE 
-            pr.productname = '1940 Ford Pickup Truck'
-    )
--- 3. Agrupamos por cliente para poder hacer la suma (SUM)
-GROUP BY 
-    c.customernumber, 
-    c.customername
--- 4. Ordenamos de mayor a menor cantidad abonada
-ORDER BY 
-    total_pagado DESC;
+SELECT p.productline                                          AS
+       "tipo de producto",
+       Round(Avg(shippeddate :: DATE - orderdate :: DATE), 2) AS
+       "tiempo de entrega medio"
+FROM   orders o
+       join orderdetails od
+         ON o.ordernumber = od.ordernumber
+       join products p
+         ON od.productcode = p.productcode
+       join productlines pl
+         ON pl.productline = p.productline
+GROUP  BY p.productline;
