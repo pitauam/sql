@@ -1,3 +1,8 @@
+ANTES DE HACER NADA PARA DESBLOQUEAR SQL:
+sudo systemctl restart postgresql
+
+
+
 COMANDOS IMPORTANTES DE UBUNTU:
 
 Si estas en la terminal y quieres abrir el File Explorer usa:
