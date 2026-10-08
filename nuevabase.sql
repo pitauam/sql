@@ -13,7 +13,7 @@ crear las tablas se almacenar ́an en un fichero llamado nuevabase.sql).
 */
 /*
 empleado se mueve de oficina => se pierde info de oficinas donde ha trabajado en el pasado
-un cliente no puede relacinarse con mas de un empleado
+un cliente no puede relacionarse con mas de un empleado
 los pagos no estan asociados a una compra
 */
 
@@ -27,6 +27,7 @@ DROP TABLE IF EXISTS public.employees CASCADE;
 DROP TABLE IF EXISTS public.offices CASCADE;
 DROP TABLE IF EXISTS public.productlines CASCADE;
 DROP TABLE IF EXISTS public.products CASCADE;
+DROP TABLE IF EXISTS public.employeehistory CASCADE; --primera tabla para resolver el primer problema
 
 CREATE TABLE public.customers (
     customernumber integer NOT NULL,
@@ -57,7 +58,7 @@ CREATE TABLE public.employees (
     firstname character varying(50) NOT NULL,
     extension character varying(10) NOT NULL,
     email character varying(100) NOT NULL,
-    officecode character varying(10) NOT NULL,
+    --officecode character varying(10) NOT NULL,
     reportsto integer,
     jobtitle character varying(50) NOT NULL
 );
@@ -160,6 +161,15 @@ CREATE TABLE public.products (
     msrp numeric(10,2) NOT NULL
 );
 
+CREATE TABLE public.employeehistory (
+    employeenumber integer NOT NULL, --numero del empleado
+    officecode character varying(10) NOT NULL, --codigo de la oficina
+    --working integer NOT NULL -- es 0 si no esta trabajando en esta oficina o 1 si está trabajando en esa oficina
+    startdate date NOT NULL, --nunca puede ser null, debe empezar a trabajar en una fecha
+    enddate date DEFAULT NULL --por defecto se pone a null indicando que es su oficina actual
+);
+
+
 ALTER TABLE public.products OWNER TO alumnodb;
 
 
@@ -222,6 +232,26 @@ ALTER TABLE ONLY public.productlines
 ALTER TABLE ONLY public.products
     ADD CONSTRAINT products_pkey PRIMARY KEY (productcode);
 
+
+
+--
+-- Name: employeehistory employeehistory_ibfk_2; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.employeehistory
+    ADD CONSTRAINT employeehistory_ibfk_1 PRIMARY KEY (employeenumber, officecode, startdate); 
+
+
+
+
+
+
+
+
+
+
+
+
 ALTER TABLE ONLY public.customers
     ADD CONSTRAINT customers_ibfk_1 FOREIGN KEY (salesrepemployeenumber) REFERENCES public.employees(employeenumber);
 
@@ -234,12 +264,13 @@ ALTER TABLE ONLY public.employees
     ADD CONSTRAINT employees_ibfk_1 FOREIGN KEY (reportsto) REFERENCES public.employees(employeenumber);
 
 
+--Hay que añadir employeehistory como un foreign key
 --
--- Name: employees employees_ibfk_2; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+-- Name: employeehistory employeehistory_ibfk_2; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
 --
 
-ALTER TABLE ONLY public.employees
-    ADD CONSTRAINT employees_ibfk_2 FOREIGN KEY (officecode) REFERENCES public.offices(officecode);
+ALTER TABLE ONLY public.employeehistory
+    ADD CONSTRAINT employeehistory_ibfk_2 FOREIGN KEY (officecode) REFERENCES public.offices(officecode);
 
 
 --
