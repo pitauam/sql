@@ -299,6 +299,14 @@ ALTER TABLE ONLY public.employeehistory
 
 
 --
+-- Name: employeehistory employeehistory_ibfk_2; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+ALTER TABLE ONLY public.employeehistory
+    ADD CONSTRAINT employeehistory_ibfk_2 FOREIGN KEY (employeenumber) REFERENCES public.employees(employeenumber);
+
+
+
+--
 -- Name: orderdetails orderdetails_ibfk_1; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
 --
 
@@ -357,3 +365,6 @@ ALTER TABLE ONLY public.customerrep
 --
 -- PostgreSQL database dump complete
 --
+
+
+-- NOTA: falta enlazarlo con el empleado (employeenumber).
