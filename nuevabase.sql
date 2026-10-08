@@ -28,6 +28,17 @@ DROP TABLE IF EXISTS public.offices CASCADE;
 DROP TABLE IF EXISTS public.productlines CASCADE;
 DROP TABLE IF EXISTS public.products CASCADE;
 DROP TABLE IF EXISTS public.employeehistory CASCADE; --primera tabla para resolver el primer problema
+DROP TABLE IF EXISTS public.customerrep CASCADE; --primera tabla para resolver el primer problema
+
+
+CREATE TABLE public.customerrep (
+    customernumber integer NOT NULL, --references customernumber
+    salesrepemployeenumber integer NOT NULL --references employeenumber
+    --primary key customernumber y salesrep
+);
+
+ALTER TABLE public.customerrep OWNER TO alumnodb;
+
 
 CREATE TABLE public.customers (
     customernumber integer NOT NULL,
@@ -41,7 +52,7 @@ CREATE TABLE public.customers (
     state character varying(50) DEFAULT NULL::character varying,
     postalcode character varying(15) DEFAULT NULL::character varying,
     country character varying(50) NOT NULL,
-    salesrepemployeenumber integer,
+    --salesrepemployeenumber integer,
     creditlimit numeric(10,2) DEFAULT NULL::numeric
 );
 
@@ -161,6 +172,10 @@ CREATE TABLE public.products (
     msrp numeric(10,2) NOT NULL
 );
 
+
+ALTER TABLE public.products OWNER TO alumnodb;
+
+
 CREATE TABLE public.employeehistory (
     employeenumber integer NOT NULL, --numero del empleado
     officecode character varying(10) NOT NULL, --codigo de la oficina
@@ -170,7 +185,7 @@ CREATE TABLE public.employeehistory (
 );
 
 
-ALTER TABLE public.products OWNER TO alumnodb;
+ALTER TABLE public.employeehistory OWNER TO alumnodb;
 
 
 ALTER TABLE ONLY public.customers
@@ -239,7 +254,17 @@ ALTER TABLE ONLY public.products
 --
 
 ALTER TABLE ONLY public.employeehistory
-    ADD CONSTRAINT employeehistory_ibfk_1 PRIMARY KEY (employeenumber, officecode, startdate); 
+    ADD CONSTRAINT employeehistory_pkey PRIMARY KEY (employeenumber, officecode, startdate); 
+
+
+--
+-- Name: customerrep customerrep_ibfk_1; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.customerrep
+    ADD CONSTRAINT customerrep_pkey PRIMARY KEY (customernumber, salesrepemployeenumber); 
+
+    
 
 
 
@@ -252,8 +277,8 @@ ALTER TABLE ONLY public.employeehistory
 
 
 
-ALTER TABLE ONLY public.customers
-    ADD CONSTRAINT customers_ibfk_1 FOREIGN KEY (salesrepemployeenumber) REFERENCES public.employees(employeenumber);
+--ALTER TABLE ONLY public.customers
+--  ADD CONSTRAINT customers_ibfk_1 FOREIGN KEY (salesrepemployeenumber) REFERENCES public.employees(employeenumber);
 
 
 --
@@ -266,11 +291,11 @@ ALTER TABLE ONLY public.employees
 
 --Hay que añadir employeehistory como un foreign key
 --
--- Name: employeehistory employeehistory_ibfk_2; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+-- Name: employeehistory employeehistory_ibfk_1; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
 --
 
 ALTER TABLE ONLY public.employeehistory
-    ADD CONSTRAINT employeehistory_ibfk_2 FOREIGN KEY (officecode) REFERENCES public.offices(officecode);
+    ADD CONSTRAINT employeehistory_ibfk_1 FOREIGN KEY (officecode) REFERENCES public.offices(officecode);
 
 
 --
@@ -312,6 +337,22 @@ ALTER TABLE ONLY public.payments
 ALTER TABLE ONLY public.products
     ADD CONSTRAINT products_ibfk_1 FOREIGN KEY (productline) REFERENCES public.productlines(productline);
 
+
+
+--
+-- Name: customerrep customerrep_ibfk_1; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.customerrep
+    ADD CONSTRAINT customerrep_ibfk_1 FOREIGN KEY (customernumber) REFERENCES public.customers(customernumber);
+
+
+--
+-- Name: customerrep customerrep_ibfk_2; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.customerrep
+    ADD CONSTRAINT customerrep_ibfk_2 FOREIGN KEY (salesrepemployeenumber) REFERENCES public.employees(employeenumber);
 
 --
 -- PostgreSQL database dump complete
