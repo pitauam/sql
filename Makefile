@@ -6,6 +6,7 @@ export PGUSER :=alumnodb
 export PGPASSWORD :=alumnodb
 export PGCLIENTENCODING:=LATIN9
 export PGHOST:=localhost
+export PGNEWDATABASE:=nuevabase
 
 DBNAME =$(PGDATABASE)
 PSQL = psql
@@ -13,6 +14,7 @@ CREATEDB = createdb
 DROPDB = dropdb --if-exists
 PG_DUMP = pg_dump
 PG_RESTORE = pg_restore
+DBNUEVA =$(PGNEWDATABASE)
 
 all: dropdb createdb restore shell
 createdb:
@@ -56,3 +58,16 @@ query6:
 	@cat query6.sql | $(PSQL) | tee -a query6.log
 
 removelogs: rm -rf *.log
+
+clean:
+	rm *.log
+
+nuevabase:
+	@echo "Eliminando base de datos anterior..."
+	@$(DROPDB) $(DBNAME)
+	@echo "Creando nueva base de datos..."
+	@$(CREATEDB)
+	@echo "Introduciendo datos de nuevabase.sql"
+	@cat $(DBNUEVA).sql | $(PSQL)
+
+	
