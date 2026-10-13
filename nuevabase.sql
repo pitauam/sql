@@ -28,7 +28,13 @@ DROP TABLE IF EXISTS public.offices CASCADE;
 DROP TABLE IF EXISTS public.productlines CASCADE;
 DROP TABLE IF EXISTS public.products CASCADE;
 DROP TABLE IF EXISTS public.employeehistory CASCADE; --primera tabla para resolver el primer problema
-DROP TABLE IF EXISTS public.customerrep CASCADE; --primera tabla para resolver el primer problema
+DROP TABLE IF EXISTS public.customerrep CASCADE; --segunda tabla para resolver el segundo problema
+DROP TABLE IF EXISTS public.paymentorder CASCADE; --tercera tabla para resolver el tercer problema
+
+CREATE TABLE public.paymentorder (
+    paymentnumber integer NOT NULL, --nuevo primary key para que cada payment tenga su propio id 
+    ordernumber integer NOT NULL --references ordernumber de orderdetails
+);
 
 
 CREATE TABLE public.customerrep (
@@ -133,6 +139,7 @@ ALTER TABLE public.orders OWNER TO alumnodb;
 --
 
 CREATE TABLE public.payments (
+    paymentnumber integer NOT NULL,  --references paymentnumber de payments
     customernumber integer NOT NULL,
     checknumber character varying(50) NOT NULL,
     paymentdate date NOT NULL,
@@ -228,8 +235,9 @@ ALTER TABLE ONLY public.orders
 -- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: alumnodb
 --
 
-ALTER TABLE ONLY public.payments
-    ADD CONSTRAINT payments_pkey PRIMARY KEY (customernumber, checknumber);
+--ALTER TABLE ONLY public.payments
+--    ADD CONSTRAINT payments_pkey PRIMARY KEY (customernumber, checknumber);
+-- ya no hay 2 primary keys, ahora paymentnumber es la primary key
 
 
 --
@@ -250,7 +258,7 @@ ALTER TABLE ONLY public.products
 
 
 --
--- Name: employeehistory employeehistory_ibfk_2; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
+-- Name: employeehistory employeehistory_pkey; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
 --
 
 ALTER TABLE ONLY public.employeehistory
@@ -258,11 +266,28 @@ ALTER TABLE ONLY public.employeehistory
 
 
 --
--- Name: customerrep customerrep_ibfk_1; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
+-- Name: customerrep customerrep_pkey; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
 --
 
 ALTER TABLE ONLY public.customerrep
     ADD CONSTRAINT customerrep_pkey PRIMARY KEY (customernumber, salesrepemployeenumber); 
+
+--
+-- Name: paymentorder paymentorder_pkey; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.payments
+    ADD CONSTRAINT payments_pkey PRIMARY KEY (paymentnumber);
+
+
+--
+-- Name: paymentorder paymentorder_pkey; Type: PK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.paymentorder
+    ADD CONSTRAINT paymentnumber_pkey PRIMARY KEY (paymentnumber, ordernumber); 
+
+
 
     
 
@@ -361,6 +386,24 @@ ALTER TABLE ONLY public.customerrep
 
 ALTER TABLE ONLY public.customerrep
     ADD CONSTRAINT customerrep_ibfk_2 FOREIGN KEY (salesrepemployeenumber) REFERENCES public.employees(employeenumber);
+
+
+--
+-- Name: paymentorder paymetorder_ibfk_1; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.paymentorder
+    ADD CONSTRAINT paymetorder_ibfk_1 FOREIGN KEY (ordernumber) REFERENCES public.orders(ordernumber);
+
+
+
+--
+-- Name: paymentorder paymetorder_ibfk_2; Type: FK CONSTRAINT; Schema: public; Owner: alumnodb
+--
+
+ALTER TABLE ONLY public.paymentorder
+    ADD CONSTRAINT paymetorder_ibfk_2 FOREIGN KEY (paymentnumber) REFERENCES public.payments(paymentnumber);
+
 
 --
 -- PostgreSQL database dump complete

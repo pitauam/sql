@@ -1,0 +1,14 @@
+Resumen del proceso del Rediseño de la Base de Datos
+
+1. Historial de Oficinas de Empleados:
+Se ha solucionado la pérdida de información al cambiar de oficina mediante la creación de la tabla employeehistory. Esta tabla registra temporalmente las asignaciones, utilizando una clave primaria compuesta por employeenumber, officecode y startdate. El campo enddate permite mantener una fecha exacta de los periodos trabajados en oficinas anteriores.
+
+
+
+2. Varios Representantes por Cliente:
+El problema de que un cliente solo pudiera estar asignado a un único empleado se resuelve quitando la clave foránea en la tabla original y creando la tabla intermedia customerrep. Con una clave primaria compuesta por customernumber y salesrepemployeenumber, ahora hay una relación de muchos a muchos, permitiendo a un cliente estar asesorado por varios de representantes.
+
+
+
+3. Pagos y Compras:
+Para evitar que los pagos queden huérfanos, se reestructuró la tabla payments asignándole un identificador único puro (paymentnumber) como nueva clave primaria. La tabla puente paymentorder relaciona el identificador con el ordernumber de la compra. Su clave primaria compuesta (paymentnumber y ordernumber) garantiza que cada pago se asigne a sus pedidos correspondientes.
