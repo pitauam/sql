@@ -19,6 +19,8 @@ int main(void) {
     #define BufferLength 512
     char x[BufferLength] = "\0";
     char y[BufferLength] = "\0";
+    char z[BufferLength] = "\0";
+    char b[BufferLength] = "\0";
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -33,23 +35,33 @@ int main(void) {
         return ret;
     }
 
+    printf("               customernumber | customername | sum");
+
+    /*pide x*/
     printf("x = ");
     (void) fflush(stdout);
+    /*comprueba que x sea algo para poder ejecutar la query*/
     while (fgets(x, (int) sizeof(x), stdin) != NULL) {
         char query[BufferLength + 28];
         /* snprintf is not defined if ansi flag is enabled */
+
         /*primer ojo*/
-        (void) snprintf(query, (size_t)(BufferLength + 27), "select y from a where x = %s;", x);
+        (void) snprintf(query, (size_t)(BufferLength + 27), "SELECT c.customernumber, c.customername, Sum(py.amount) FROM   payments py JOIN customers c ON py.customernumber = c.customernumber JOIN orders o ON c.customernumber = o.customernumber JOIN orderdetails od ON o.ordernumber = od.ordernumber JOIN products p ON od.productcode = p.productcode WHERE  p.productname = '1940 Ford Pickup Truck' GROUP  BY c.customernumber ORDER  BY Sum(py.amount) DESC;");
         /*copiado de la pizarra, lo ha pedido la profe*/
         printf("%s\n",query);
 
         (void) SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
 
+        printf("customernumber | customername | sum");
+        /*aqui se asigna a y la columna seleccionada en el select*/
         (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) y, BufferLength , NULL);
+        (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) z, BufferLength , NULL);
+        (void) SQLBindCol(stmt, 3, SQL_C_CHAR, (SQLCHAR*) b, BufferLength , NULL);
 
         /* Loop through the rows in the result-set */
         while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-            printf("y = %s\n", y);
+            /*imprime cada row*/
+            printf("%15s %30s %15s\n", y,z,b);
         }
 
         /*segundo ojo, primero error de sintaxis y segundo no funciona*/
