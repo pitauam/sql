@@ -38,7 +38,10 @@ int main(void) {
     while (fgets(x, (int) sizeof(x), stdin) != NULL) {
         char query[BufferLength + 28];
         /* snprintf is not defined if ansi flag is enabled */
+        /*primer ojo*/
         (void) snprintf(query, (size_t)(BufferLength + 27), "select y from a where x = %s;", x);
+        /*copiado de la pizarra, lo ha pedido la profe*/
+        printf("%s\n",query);
 
         (void) SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
 
@@ -49,6 +52,8 @@ int main(void) {
             printf("y = %s\n", y);
         }
 
+        /*segundo ojo, primero error de sintaxis y segundo no funciona*/
+        
         ret2 = SQLCloseCursor(stmt);
         if (!SQL_SUCCEEDED(ret2)) {
             odbc_extract_error("", stmt, SQL_HANDLE_STMT);
@@ -56,6 +61,7 @@ int main(void) {
         }
 
         printf("x = ");
+        /*limpiar*/
         ret = fflush(stdout);
     }
     printf("\n");

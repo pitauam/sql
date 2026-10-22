@@ -9,13 +9,11 @@ p2: https://moodle.uam.es/pluginfile.php/5570081/mod_resource/content/3/essay_2.
 “Programming Manual tutorial”: http://www.unixodbc.org/doc/ProgrammerManual/Tutorial/
 
 
+"Todas las funciones de ODB vienen en el example3.c"
 
-
-
-
-
-
-
+coger primera consulta meterla en odbc example 3 la pruebo y me vengo arriba una vez que lo tengo me voy a menu.c
+meto todas las opciones de menus submenus y pillo el primero y lo meto como un void y ya veo la base de datos el handle
+y tengo mi primer menu funcionando con la primera consulta
 
 
 
