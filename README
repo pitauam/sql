@@ -1,5 +1,47 @@
-P1:
+------------------P2:------------------
 
+
+documentacion: http://www.unixodbc.org
+
+p2: https://moodle.uam.es/pluginfile.php/5570081/mod_resource/content/3/essay_2.pdf
+
+
+“Programming Manual tutorial”: http://www.unixodbc.org/doc/ProgrammerManual/Tutorial/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------P1:------------------
 ANTES DE HACER NADA PARA DESBLOQUEAR SQL:
 sudo systemctl restart postgresql
 

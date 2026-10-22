@@ -2,7 +2,7 @@ CC = gcc -g
 CFLAGS = -Wall -Wextra -pedantic #-ansi
 LDLIBS = -lodbc
 
-export PGDATABASE:=test01
+export PGDATABASE:=classicmodels
 export PGUSER :=alumnodb
 export PGPASSWORD :=alumnodb
 export PGCLIENTENCODING:=LATIN9
@@ -15,7 +15,7 @@ DROPDB = dropdb --if-exists
 PG_DUMP = pg_dump
 PG_RESTORE = pg_restore
 
-test01: dropdb createdb restore shell
+classicmodels: dropdb createdb restore shell
 createdb:
 	@echo Creando BBDD
 	@$(CREATEDB)
@@ -39,7 +39,7 @@ EXE = odbc-connection-test odbc-connection-test-2 odbc-example1 odbc-example2 od
 
 all : $(EXE)
 
-test01: 
+classicmodels: 
 
 clean :
 	rm -f *.o core $(EXE)
