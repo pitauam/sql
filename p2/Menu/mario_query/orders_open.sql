@@ -1,1 +1,1 @@
-seas
+SELECT o.ordernumber FROM orders WHERE o.shippeddate = NULL
