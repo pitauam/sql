@@ -157,12 +157,12 @@ void ShowProductsMenu() {
                 break;
 
             case 3: {
-                PrintLittleBoPeep();
+                printf("Bye Bye\n\n");
             }
                 break;
 
             case 4: {
-                printf("Bye Bye\n\n");
+                
             }
                 break;
         }
@@ -183,10 +183,9 @@ void ShowProductsMenu() {
 
     do {
 
-        printf(" (1) Mary had a little lamb\n"
-               " (2) Jack and Jill\n"
-               " (3) Little Bo Peep\n"
-               " (4) Quit\n\n");
+        printf(" (1) Stock\n"
+               " (2) Find\n"
+               " (3) Back\n");
 
         printf("Enter a number that corresponds to your choice > ");
         if (!fgets(buf, 16, stdin))
@@ -198,10 +197,10 @@ void ShowProductsMenu() {
         printf("\n");
 
 
-        if ((nSelected < 1) || (nSelected > 4)) {
+        if ((nSelected < 1) || (nSelected > 3)) {
             printf("You have entered an invalid choice. Please try again\n\n\n");
         }
-    } while ((nSelected < 1) || (nSelected > 4));
+    } while ((nSelected < 1) || (nSelected > 3));
 
     return nSelected;
 }
@@ -259,10 +258,10 @@ void ShowOrdersMenu() {
 
     do {
 
-        printf(" (1) The zub zubs\n"
-               " (2) The BFG\n"
-               " (3) PrintAliens\n"
-               " (4) Quit\n\n");
+        printf(" (1) Open\n"
+               " (2) Range\n"
+               " (3) Detail\n"
+               " (4) Back\n\n");
 
         printf("Enter a number that corresponds to your choice > ");
         if (!fgets(buf, 16, stdin))
@@ -334,10 +333,10 @@ void ShowCustomersMenu() {
 
     do {
 
-        printf(" (1) The zub zubs\n"
-               " (2) The BFG\n"
-               " (3) PrintAliens\n"
-               " (4) Quit\n\n");
+        printf(" (1) Find\n"
+               " (2) List Products\n"
+               " (3) Balance\n"
+               " (4) Back\n\n");
 
         printf("Enter a number that corresponds to your choice > ");
         if (!fgets(buf, 16, stdin))
