@@ -2,7 +2,7 @@ CC = gcc -g
 CFLAGS = -Wall -Wextra -pedantic #-ansi
 LDLIBS = -lodbc
 
-export PGDATABASE:=classicmodels
+export PGDATABASE:=test01 #PONER CLASSICMODELS O TEST01 AQUI PARA CUANDO SE PRUEBE MENU
 export PGUSER :=alumnodb
 export PGPASSWORD :=alumnodb
 export PGCLIENTENCODING:=LATIN9

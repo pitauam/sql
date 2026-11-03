@@ -1,1 +1,1 @@
-SELECT pepe from wasas
+/*Back: Permite volver al menu anterior.*/
