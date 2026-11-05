@@ -19,3 +19,4 @@ WHERE  p.productname = '1940 Ford Pickup Truck'
 GROUP  BY c.customernumber
 ORDER  BY Sum(py.amount) DESC;
 
+

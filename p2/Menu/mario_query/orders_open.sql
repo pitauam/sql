@@ -1,1 +1,1 @@
-SELECT o.ordernumber FROM orders WHERE o.shippeddate = NULL
+SELECT o.ordernumber FROM orders o WHERE o.shippeddate IS NULL ORDER BY o.ordernumber

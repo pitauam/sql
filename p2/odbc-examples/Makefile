@@ -2,9 +2,9 @@ CC = gcc -g
 CFLAGS = -Wall -Wextra -pedantic #-ansi
 LDLIBS = -lodbc
 
-export PGDATABASE:=test01 #PONER CLASSICMODELS O TEST01 AQUI PARA CUANDO SE PRUEBE MENU
-export PGUSER :=alumnodb
-export PGPASSWORD :=alumnodb
+export PGDATABASE:=classicmodels#PONER CLASSICMODELS O TEST01 AQUI PARA CUANDO SE PRUEBE MENU
+export PGUSER:=alumnodb
+export PGPASSWORD:=alumnodb
 export PGCLIENTENCODING:=LATIN9
 export PGHOST:=localhost
 
@@ -35,7 +35,7 @@ shell:
 	@$(PSQL)
 
 
-EXE = odbc-connection-test odbc-connection-test-2 odbc-example1 odbc-example2 odbc-example3 odbc-example4 
+EXE = odbc-connection-test odbc-connection-test-2 odbc-example1 odbc-example2 odbc-example3 odbc-example4 pruebas_Mario
 
 all : $(EXE)
 
