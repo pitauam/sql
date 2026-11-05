@@ -1,0 +1,1 @@
+SELECT o.orderdate, o.status, od.quantityordered, od.priceeach, od.productcode FROM orders o JOIN orderdetails od ON o.ordernumber = od.ordernumber WHERE od.ordernumber = ? ORDER BY od.orderlinenumber; 

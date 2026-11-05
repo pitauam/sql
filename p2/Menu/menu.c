@@ -38,7 +38,8 @@ static int ShowCustomersSubMenu();
 
 static int PrintOpen();
 static int PrintRange();
-static void PrintAliens();
+static int PrintDetail();
+
 static void PrintMary();
 static void PrintJack();
 static void PrintLittleBoPeep();
@@ -245,12 +246,13 @@ void ShowOrdersMenu() {
                 break;
 
             case 2: {
-                PrintBigFatGit();
+                PrintRange();
+
             }
                 break;
 
             case 3: {
-                PrintAliens();
+                PrintDetail();
             }
                 break;
 
@@ -492,8 +494,110 @@ void PrintLittleBoPeep() {
  * @author rmarabini
  *
  */
-void PrintBigFatGit() {
-    printf("im big and fat and a git\n\n\n");
+static int PrintRange(){
+    SQLHENV env = NULL;
+    SQLHDBC dbc = NULL;
+    SQLHSTMT stmt = NULL;
+    int ret; /* odbc.c */
+    SQLRETURN ret2; /* ODBC API return status */
+    SQLLEN ind1 = SQL_NTS;
+    SQLLEN ind2 = SQL_NTS;
+    char date1[BufferLength] = "\0";
+    char date2[BufferLength] = "\0";
+    char ordernumber[BufferLength] = "\0";
+    char orderdate[BufferLength] = "\0";
+    char shippedate[BufferLength] = "\0";
+
+    /* CONNECT */
+    ret = odbc_connect(&env, &dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
+
+    /* Allocate a statement handle */
+    ret = SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_ENV);
+        return ret;
+    }
+
+
+    /*pide x*/
+
+
+    printf("date1 = ");
+    (void) fflush(stdout);
+    if (fgets(date1, (int) sizeof(date1), stdin) != NULL) {
+        date1[strcspn(date1, "\r\n")] = 0; // Limpiar el \n
+    }
+
+    printf("date2 = ");
+    (void) fflush(stdout);
+    if (fgets(date2, (int) sizeof(date2), stdin) != NULL) {
+        date2[strcspn(date2, "\r\n")] = 0; // Limpiar el \n
+    }
+    
+    char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND ORDERDATE <= ? ORDER BY ordernumber";
+    
+    /* preparamos la consulta */
+    ret = SQLPrepare(stmt, (SQLCHAR*) query, SQL_NTS);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+
+    /* vinculamos las ? con las variables */
+    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, date1, sizeof(date1), &ind1);
+    SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, date2, sizeof(date2), &ind2);
+
+    /* Ejecutamos */
+    ret = SQLExecute(stmt);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+
+    printf("  ordernumber     |       orderdate      |     shippeddate\n");
+    printf("-----------------------------------------------------------\n");
+        /*aqui se asigna a y la columna seleccionada en el select*/
+        (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) ordernumber, BufferLength , NULL);
+        (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) orderdate, BufferLength , NULL);
+        (void) SQLBindCol(stmt, 3, SQL_C_CHAR, (SQLCHAR*) shippedate, BufferLength , NULL);
+
+        /* Loop through the rows in the result-set */
+        while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+            /*imprime cada row*/
+            printf("%15s %30s %15s\n",ordernumber,orderdate,shippedate);
+        }
+
+        /*segundo ojo, primero error de sintaxis y segundo no funciona*/
+        
+        ret2 = SQLCloseCursor(stmt);
+        if (!SQL_SUCCEEDED(ret2)) {
+            odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+           return ret;
+        }
+
+        /*limpiar*/
+        ret = fflush(stdout);
+
+    printf("\n");
+    
+    /* free up statement handle */
+    ret2 = SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    if (!SQL_SUCCEEDED(ret2)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return ret;
+    }
+
+    /* DISCONNECT */
+    ret = odbc_disconnect(env, dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+
 }
 
 /**
@@ -504,7 +608,7 @@ void PrintBigFatGit() {
  *
  */
 
-void PrintAliens() {
+int PrintDetail() {
     printf("take us to your leader\n\n\n");
 }
      
