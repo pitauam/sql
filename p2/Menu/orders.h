@@ -11,3 +11,5 @@
 static int PrintRange();
 
 static int PrintOpen();
+
+static int PrintDetail();

@@ -42,7 +42,7 @@ static int PrintDetail();
 
 static void PrintMary();
 static void PrintJack();
-static void PrintLittleBoPeep();
+static int PrintBalance();
 
 static void PrintProducts();
 static void PrintOrders();
@@ -139,10 +139,10 @@ int ShowMainMenu() {
             nSelected = atoi(buf);
         printf("\n");
 
-        if ((nSelected < 1) || (nSelected > 3)) {
+        if ((nSelected < 1) || (nSelected > 4)) {
             printf("You have entered an invalid choice. Please try again\n\n\n");
         }
-    } while ((nSelected < 1) || (nSelected > 3));
+    } while ((nSelected < 1) || (nSelected > 4));
 
     return nSelected;
 }
@@ -179,12 +179,8 @@ void ShowProductsMenu() {
             }
                 break;
 
-            case 4: {
-                
-            }
-                break;
         }
-    } while (nChoice != 4);
+    } while (nChoice != 3);
 
 }
 
@@ -327,7 +323,7 @@ void ShowCustomersMenu() {
                 break;
 
             case 3: {
-                PrintAliens();
+                PrintBalance();
             }
                 break;
 
