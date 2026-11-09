@@ -115,9 +115,10 @@ int PrintFindProducts(void) {
     /*primero pide el productname, antes de conectarse*/
     printf("Enter productname > ");
     (void) fflush(stdout);
-    if (fgets(search, (char)sizeof(search), stdin) != NULL) {
-        search[strcspn(search, "\r\n")] = 0; /*Limpiar el \n*/ 
+    if (fgets(search, sizeof(search), stdin) == NULL) {
+        return EXIT_FAILURE;
     }
+    search[strcspn(search, "\r\n")] = 0; /*Limpiar el \n*/
 
 
     /* CONNECT */
@@ -142,7 +143,7 @@ int PrintFindProducts(void) {
     }
 
     /* vinculamos las ? con las variables */
-    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, search, sizeof(search), &ind1);
+    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sizeof(search) - 1, 0, search, sizeof(search), &ind1);
 
     /* Ejecutamos */
     ret = SQLExecute(stmt);
