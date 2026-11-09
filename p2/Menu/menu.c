@@ -120,8 +120,8 @@ int ShowMainMenu() {
                      as 'qwerty' */
 
     do {
-        printf("This is a nursery rhyme and fairy stories program\n");
-        printf("You can choose to display a number of different nursery rhymes and fairy stories\n\n");
+        printf("This is a program where you can execute different querys\n");
+        printf("You can choose a number of different queries\n\n");
 
         printf(" (1) Products\n"
                " (2) Orders\n"
