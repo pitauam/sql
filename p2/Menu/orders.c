@@ -91,6 +91,7 @@ int PrintRange(){
     SQLLEN ind2 = SQL_NTS;
     char date1[BufferLength] = "\0";
     char date2[BufferLength] = "\0";
+    char input_line[BufferLength] = "\0";
     char ordernumber[BufferLength] = "\0";
     char orderdate[BufferLength] = "\0";
     char shippedate[BufferLength] = "\0";
@@ -108,23 +109,16 @@ int PrintRange(){
         return ret;
     }
 
-
-    /*pide x*/
-
-
-    printf("date1 = ");
+    /* Pedir fechas en el formato requerido por el expect */
+    printf("Enter dates (YYYY-MM-DD - YYYY-MM-DD) > ");
     (void) fflush(stdout);
-    if (fgets(date1, (int) sizeof(date1), stdin) != NULL) {
-        date1[strcspn(date1, "\r\n")] = 0; /*Limpiar el \n*/ 
-    }
-
-    printf("date2 = ");
-    (void) fflush(stdout);
-    if (fgets(date2, (int) sizeof(date2), stdin) != NULL) {
-        date2[strcspn(date2, "\r\n")] = 0; /*Limpiar el \n*/ 
+    if (fgets(input_line, (int) sizeof(input_line), stdin) != NULL) {
+        input_line[strcspn(input_line, "\r\n")] = 0; /* Limpiar el \n */ 
+        /* Separar la entrada en date1 y date2 utilizando el guión como separador */
+        sscanf(input_line, "%s - %s", date1, date2);
     }
     
-    char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND ORDERDATE <= ? ORDER BY ordernumber";
+    char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND orderdate <= ? ORDER BY ordernumber";
     
     /* preparamos la consulta */
     ret = SQLPrepare(stmt, (SQLCHAR*) query, SQL_NTS);
@@ -144,29 +138,25 @@ int PrintRange(){
         return EXIT_FAILURE;
     }
 
-    printf("  ordernumber     |       orderdate      |     shippeddate\n");
-    printf("-----------------------------------------------------------\n");
-        /*aqui se asigna a y la columna seleccionada en el select*/
-        (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) ordernumber, BufferLength , NULL);
-        (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) orderdate, BufferLength , NULL);
-        (void) SQLBindCol(stmt, 3, SQL_C_CHAR, (SQLCHAR*) shippedate, BufferLength , NULL);
+    /* Asignar las columnas seleccionadas en el select */
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) ordernumber, BufferLength, NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) orderdate, BufferLength, NULL);
+    (void) SQLBindCol(stmt, 3, SQL_C_CHAR, (SQLCHAR*) shippedate, BufferLength, NULL);
 
-        /* Loop through the rows in the result-set */
-        while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-            /*imprime cada row*/
-            printf("%15s %30s %15s\n",ordernumber,orderdate,shippedate);
-        }
-
-        /*segundo ojo, primero error de sintaxis y segundo no funciona*/
+    /* Loop through the rows in the result-set */
+    while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+        /* Imprimir cada row sin cabeceras y con formato plano para el expect */
+        printf("%s %s %s\n", ordernumber, orderdate, shippedate);
+    }
         
-        ret2 = SQLCloseCursor(stmt);
-        if (!SQL_SUCCEEDED(ret2)) {
-            odbc_extract_error("", stmt, SQL_HANDLE_STMT);
-           return ret;
-        }
+    ret2 = SQLCloseCursor(stmt);
+    if (!SQL_SUCCEEDED(ret2)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return ret;
+    }
 
-        /*limpiar*/
-        ret = fflush(stdout);
+    /* limpiar */
+    (void) fflush(stdout);
 
     printf("\n");
     
@@ -184,7 +174,6 @@ int PrintRange(){
     }
 
     return EXIT_SUCCESS;
-
 }
 
 int PrintDetail(){
@@ -200,7 +189,6 @@ int PrintDetail(){
     char status[BufferLength] = "\0";
     int quantity;
     double price;
-    int primera_vez = 1;
 
 
     /* CONNECT */
@@ -218,7 +206,7 @@ int PrintDetail(){
     /*pide x*/
 
 
-    printf("Ordernumber = ");
+    printf("Enter ordernumber > ");
     (void) fflush(stdout);
     if (fgets(ordernumber, (int) sizeof(ordernumber), stdin) != NULL) {
         ordernumber[strcspn(ordernumber, "\r\n")] = 0; /*Limpiar el \n*/ 
@@ -251,14 +239,7 @@ int PrintDetail(){
         /* Loop through the rows in the result-set */
         while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
             /*imprime cada row*/
-            if(primera_vez){
-                printf("Order Date: %s -Status: %s\n",orderdate,status);
-                printf("Total cost: %.2f \n", quantity * price);
-                printf("--Productos-- \n");
-                primera_vez = 0;
-            }
-
-            printf("%15s | Cantidad: %d | Precio: %.2f\n", productcode, quantity, price);
+            printf("%15s %d %.2f\n", productcode, quantity, price);
 
         }
 
