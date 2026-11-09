@@ -8,7 +8,7 @@
 
 #include "orders.h"
 
-static int PrintOpen(){
+int PrintOpen(){
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
@@ -81,7 +81,7 @@ static int PrintOpen(){
     return EXIT_SUCCESS;
 }
 
-static int PrintRange(){
+int PrintRange(){
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
@@ -115,13 +115,13 @@ static int PrintRange(){
     printf("date1 = ");
     (void) fflush(stdout);
     if (fgets(date1, (int) sizeof(date1), stdin) != NULL) {
-        date1[strcspn(date1, "\r\n")] = 0; // Limpiar el \n
+        date1[strcspn(date1, "\r\n")] = 0; /*Limpiar el \n*/ 
     }
 
     printf("date2 = ");
     (void) fflush(stdout);
     if (fgets(date2, (int) sizeof(date2), stdin) != NULL) {
-        date2[strcspn(date2, "\r\n")] = 0; // Limpiar el \n
+        date2[strcspn(date2, "\r\n")] = 0; /*Limpiar el \n*/ 
     }
     
     char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND ORDERDATE <= ? ORDER BY ordernumber";
@@ -187,7 +187,7 @@ static int PrintRange(){
 
 }
 
-static int PrintDetail(){
+int PrintDetail(){
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
@@ -221,7 +221,7 @@ static int PrintDetail(){
     printf("Ordernumber = ");
     (void) fflush(stdout);
     if (fgets(ordernumber, (int) sizeof(ordernumber), stdin) != NULL) {
-        ordernumber[strcspn(ordernumber, "\r\n")] = 0; // Limpiar el \n
+        ordernumber[strcspn(ordernumber, "\r\n")] = 0; /*Limpiar el \n*/ 
     }
     
     

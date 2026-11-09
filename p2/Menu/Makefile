@@ -1,21 +1,28 @@
 CC = gcc -g
-CFLAGS = -Wall -Wextra -pedantic -ansi
+CFLAGS = -Wall -Wextra -pedantic -std=c99
 LDLIBS = -lodbc
 
-# recompile if this heder changes
-HEADERS = odbc.h
-
 EXE = menu
-OBJ = $(EXE).o odbc.o 
 
-all : $(EXE)
+all: $(EXE)
 
-%.o: %.c $(HEADERS)
-	@echo Compiling $<...
-	$(CC) $(CFLAGS) -c -o $@ $<
+menu: menu.o odbc.o customers.o orders.o products.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
-$(EXE): $(OBJ)
-	$(CC) -o $(EXE) $(OBJ) $(LDLIBS)
+menu.o: menu.c odbc.h customers.h orders.h products.h
+	$(CC) $(CFLAGS) -c $<
 
-clean :
+customers.o: customers.c customers.h odbc.h
+	$(CC) $(CFLAGS) -c $<
+
+orders.o: orders.c orders.h odbc.h
+	$(CC) $(CFLAGS) -c $<
+
+products.o: products.c products.h odbc.h
+	$(CC) $(CFLAGS) -c $<
+
+odbc.o: odbc.c odbc.h
+	$(CC) $(CFLAGS) -c $<
+
+clean:
 	rm -f *.o core $(EXE)

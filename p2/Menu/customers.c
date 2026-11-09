@@ -5,8 +5,21 @@
 #include <sql.h>
 #include <sqlext.h>
 #include "odbc.h"
+#include "customers.h"
 
-static int PrintBalance(){
+#define BufferLength 512
+
+
+int PrintFind(void) {
+
+}
+
+int PrintListProducts(void) {
+
+}
+    
+
+int PrintBalance(){
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;

@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef CUSTOMERS_H
+#define CUSTOMERS_H
 
-#include <string.h>
-#include <sql.h>
-#include <sqlext.h>
-#include "odbc.h"
+int PrintFind(void);
+int PrintListProducts(void);
+int PrintBalance(void);
 
-#define BufferLength 512
-
-static int PrintBalance();
+#endif

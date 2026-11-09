@@ -8,8 +8,8 @@
 
 #define BufferLength 512
 
-static int PrintRange();
+int PrintRange();
 
-static int PrintOpen();
+int PrintOpen();
 
-static int PrintDetail();
+int PrintDetail();
