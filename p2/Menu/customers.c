@@ -55,11 +55,9 @@ int PrintFindCustomers(void) {
     }
 
     /* Vinculamos el texto buscado a las dos condiciones */
-    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
-                           sizeof(search) - 1, 0, search, sizeof(search), &name_length);
+    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sizeof(search) - 1, 0, search, sizeof(search), &name_length);
     if (SQL_SUCCEEDED(ret)) {
-        ret = SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
-                               sizeof(search) - 1, 0, search, sizeof(search), &name_length);
+        ret = SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sizeof(search) - 1, 0, search, sizeof(search), &name_length);
     }
 
     if (!SQL_SUCCEEDED(ret)) {
@@ -82,8 +80,7 @@ int PrintFindCustomers(void) {
     
     /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        printf("%ld %s %s %s\n", (long)customernumber, customername,
-               contactfirstname, contactlastname);
+        printf("%ld %s %s %s\n", (long)customernumber, customername, contactfirstname, contactlastname);
     }
 
     ret2 = SQLCloseCursor(stmt);
@@ -114,6 +111,95 @@ int PrintFindCustomers(void) {
 }
 
 int PrintListProducts(void) {
+
+    SQLHENV env = NULL;
+    SQLHDBC dbc = NULL;
+    SQLHSTMT stmt = NULL;
+    int ret; /* odbc.c */
+    SQLRETURN ret2; /* ODBC API return status */
+    SQLLEN name_length = SQL_NTS;
+    /*numero del customer a buscar*/
+    SQLINTEGER customernumber;
+    char productos[BufferLength];
+    int numerototalsolicitado;
+ 
+    /*muestra el prompt antes de conectar*/
+    printf("Enter customer number > ");
+    (void)fflush(stdout);
+    if (fgets((int)customernumber, 0, stdin) == NULL) {
+        return EXIT_FAILURE;
+    }
+
+    /* CONNECT */
+    ret = odbc_connect(&env, &dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
+
+    /* Allocate a statement handle */
+    ret = SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_ENV);
+        return ret;
+    }
+
+    /* Preparamos la consulta para encontrar el cliente */
+    ret = SQLPrepare(stmt, (SQLCHAR*) 
+        "SELECT products.productname, SUM(orderdetails.quantityordered) AS 'unidades_totales' FROM orders JOIN orderdetails ON orderdetails.ordernumber = orders.ordernumber JOIN products ON products.productcode = orderdetails.productcode WHERE customers.customernumber = ? GROUP BY products.productcode, products.productname ORDER BY products.productcode ", SQL_NTS);
+        
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+
+    /* Vinculamos el texto buscado a las dos condiciones */
+    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
+                           sizeof(customernumber) - 1, 0, customernumber, sizeof(customernumber), &name_length);
+
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+
+    /* Ejecutamos */
+    ret = SQLExecute(stmt);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+
+    /* Asignamos cada columna al tipo de dato correspondiente */
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, productos, sizeof(productos), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_INTEGER, numerototalsolicitado, sizeof(numerototalsolicitado), NULL);
+
+    
+    /* Loop through the rows in the result-set */
+    while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+        printf("%s %ld\n", productos, numerototalsolicitado);
+    }
+
+    ret2 = SQLCloseCursor(stmt);
+    if (!SQL_SUCCEEDED(ret2)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return ret;
+    }
+
+    /* Limpiar */
+    ret = fflush(stdout);
+    printf("\n");
+    
+    /* free up statement handle */
+    ret2 = SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    if (!SQL_SUCCEEDED(ret2)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return ret;
+    }
+
+    /* DISCONNECT */
+    ret = odbc_disconnect(env, dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
