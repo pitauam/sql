@@ -98,8 +98,94 @@ int PrintStock() {
     return EXIT_SUCCESS;
 }
 
-int PrintFindProducts(void){
+int PrintFindProducts(void) {
+    SQLHENV env = NULL;
+    SQLHDBC dbc = NULL;
+    SQLHSTMT stmt = NULL;
+    int ret; /* odbc.c */
+    SQLRETURN ret2; /* ODBC API return status */
+    SQLLEN ind1 = SQL_NTS;
+    /*search es el nombre del producto*/
+    char search[BufferLength] = "\0";
 
+    char productcode[BufferLength] = "\0";
+    char productname[BufferLength] = "\0";
+
+
+    /*primero pide el productname, antes de conectarse*/
+    printf("Enter productname > ");
+    (void) fflush(stdout);
+    if (fgets(search, (char)sizeof(search), stdin) != NULL) {
+        search[strcspn(search, "\r\n")] = 0; /*Limpiar el \n*/ 
+    }
+
+
+    /* CONNECT */
+    ret = odbc_connect(&env, &dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
+
+    /* Allocate a statement handle */
+    ret = SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_ENV);
+        return ret;
+    }
+    
+    
+    /* preparamos la consulta */
+    ret = SQLPrepare(stmt, (SQLCHAR*) "SELECT productcode, productname FROM products WHERE productname LIKE '%' || ? || '%' ORDER BY productcode;", SQL_NTS);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+
+    /* vinculamos las ? con las variables */
+    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, search, sizeof(search), &ind1);
+
+    /* Ejecutamos */
+    ret = SQLExecute(stmt);
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
+        /*aqui se asigna a y la columna seleccionada en el select*/
+        (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) productcode, BufferLength , NULL);
+        (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) productname, BufferLength , NULL);
+        
+        /* Loop through the rows in the result-set */
+        while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+            /*imprime cada row*/
+            printf("%s %s\n", productcode, productname);
+
+        }
+
+        /*segundo ojo, primero error de sintaxis y segundo no funciona*/
+        
+        ret2 = SQLCloseCursor(stmt);
+        if (!SQL_SUCCEEDED(ret2)) {
+            odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+           return ret;
+        }
+
+        /*limpiar*/
+        ret = fflush(stdout);
+
+    printf("\n");
+    
+    /* free up statement handle */
+    ret2 = SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+    if (!SQL_SUCCEEDED(ret2)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return ret;
+    }
+
+    /* DISCONNECT */
+    ret = odbc_disconnect(env, dbc);
+    if (!SQL_SUCCEEDED(ret)) {
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
