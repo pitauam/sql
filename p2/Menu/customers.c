@@ -16,12 +16,21 @@ int PrintFindCustomers(void) {
     SQLHSTMT stmt = NULL;
     int ret; /* odbc.c */
     SQLRETURN ret2; /* ODBC API return status */
+    SQLLEN name_length = SQL_NTS;
     /*nombre del customer a buscar*/
+    char search[BufferLength];
     char customername[BufferLength];
     char contactfirstname[BufferLength];
     char contactlastname[BufferLength];
-    int customernumber;
+    SQLINTEGER customernumber;
  
+    /*muestra el prompt antes de conectar*/
+    printf("Enter customer name > ");
+    (void)fflush(stdout);
+    if (fgets(search, sizeof(search), stdin) == NULL) {
+        return EXIT_FAILURE;
+    }
+    search[strcspn(search, "\r\n")] = '\0';
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -36,24 +45,27 @@ int PrintFindCustomers(void) {
         return ret;
     }
 
-    /* Pide el customername con scanf como char */
-    printf("Enter customer name > ");
-    (void) fflush(stdout);
-    (void) scanf("%s", customername);
-    
-    /* Preparamos la consulta con para encontrar el cliente */
+    /* Preparamos la consulta para encontrar el cliente */
     ret = SQLPrepare(stmt, (SQLCHAR*) 
-        "SELECT customers.customername, customers.contactfirstname, customers.contactlastname, customers.customernumber FROM customers WHERE customers.contactfirstname LIKE '%%' || ? || '%%' OR customers.contactlastname LIKE '%%' || ? || '%%' ORDER BY customers.customernumber", SQL_NTS);
+        "SELECT customers.customername, customers.contactfirstname, customers.contactlastname, customers.customernumber FROM customers WHERE customers.contactfirstname LIKE '%' || ? || '%' OR customers.contactlastname LIKE '%' || ? || '%' ORDER BY customers.customernumber", SQL_NTS);
         
     if (!SQL_SUCCEEDED(ret)) {
         odbc_extract_error("", stmt, SQL_HANDLE_STMT);
         return EXIT_FAILURE;
     }
 
-    /* Vinculamos la ? con la variable entera usando SQL_C_SLONG y SQL_INTEGER */
-    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &customername, 0, NULL);
-    /* Se vuelve a vincular para la segunda ? */
-    SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &customername, 0, NULL);
+    /* Vinculamos el texto buscado a las dos condiciones */
+    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
+                           sizeof(search) - 1, 0, search, sizeof(search), &name_length);
+    if (SQL_SUCCEEDED(ret)) {
+        ret = SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
+                               sizeof(search) - 1, 0, search, sizeof(search), &name_length);
+    }
+
+    if (!SQL_SUCCEEDED(ret)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return EXIT_FAILURE;
+    }
 
     /* Ejecutamos */
     ret = SQLExecute(stmt);
@@ -62,17 +74,16 @@ int PrintFindCustomers(void) {
         return EXIT_FAILURE;
     }
 
-    /* Asignamos la priemra columna seleccionada al id */
-    (void) SQLBindCol(stmt, 1, SQL_C_DOUBLE, &customernumber, 0, NULL);
-    /* Asignamos la segunda columna seleccionada al nombre */
-    (void) SQLBindCol(stmt, 2, SQL_C_DOUBLE, &contactfirstname, 0, NULL);
-    /* Asignamos la tercera columna seleccionada al apellido */
-    (void) SQLBindCol(stmt, 3, SQL_C_DOUBLE, &contactlastname, 0, NULL);
+    /* Asignamos cada columna al tipo de dato correspondiente */
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, customername, sizeof(customername), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_CHAR, contactfirstname, sizeof(contactfirstname), NULL);
+    (void) SQLBindCol(stmt, 3, SQL_C_CHAR, contactlastname, sizeof(contactlastname), NULL);
+    (void) SQLBindCol(stmt, 4, SQL_C_SLONG, &customernumber, 0, NULL);
     
     /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        /* Imprime el saldo exactamente con el formato del expect */
-        printf("%i, %s, %s", customernumber, contactfirstname, contactlastname);
+        printf("%ld %s %s %s\n", (long)customernumber, customername,
+               contactfirstname, contactlastname);
     }
 
     ret2 = SQLCloseCursor(stmt);
