@@ -1,7 +1,7 @@
 #ifndef CUSTOMERS_H
 #define CUSTOMERS_H
 
-int PrintFind(void);
+int PrintFindCustomers(void);
 int PrintListProducts(void);
 int PrintBalance(void);
 

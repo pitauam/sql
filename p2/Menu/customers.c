@@ -10,12 +10,14 @@
 #define BufferLength 512
 
 
-int PrintFind(void) {
+int PrintFindCustomers(void) {
 
+    return EXIT_SUCCESS;
 }
 
 int PrintListProducts(void) {
 
+    return EXIT_SUCCESS;
 }
     
 

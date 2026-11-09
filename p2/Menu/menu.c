@@ -39,9 +39,9 @@ static int ShowCustomersSubMenu();
 int PrintOpen();
 int PrintRange();
 int PrintDetail();
-static void PrintProductsStock(void);
+int PrintStock();
 
-static void PrintJack();
+/*static void PrintJack();*/
 
 
 
@@ -161,13 +161,13 @@ void ShowProductsMenu() {
         switch (nChoice) {
 
             case 1: {
-                PrintProductsStock();
+                PrintStock();
                 /*PrintMary();*/
             }
                 break;
 
             case 2: {
-                PrintJack();
+                PrintFindProducts();
             }
                 break;
 
@@ -310,7 +310,7 @@ void ShowCustomersMenu() {
         nChoice = ShowCustomersSubMenu();
         switch (nChoice) {
             case 1: {
-                (void)PrintFind();
+                (void)PrintFindCustomers();
             }
                 break;
 
@@ -373,9 +373,10 @@ void ShowCustomersMenu() {
  * @author rmarabini
  *
  */
+/*
 void PrintJack() {
     printf("Jack and jill went up the hill to fetch water\nThen they fell down\n\n\n");
-}
+}*/
 
 /**
  * @brief prints Rhyme LittleBoPee
@@ -386,85 +387,4 @@ void PrintJack() {
  */
 void PrintLittleBoPeep() {
     printf("Little bo peep had sheep\nthen they came home\n\n\n");
-}
-
-/**
- * @brief prints Stock of Products
- *
- * @return void
- * @author Santiago Pita
- *
- */
-void PrintProductsStock() {
-    SQLHENV env = NULL;
-    SQLHDBC dbc = NULL;
-    SQLHSTMT stmt = NULL;
-    int ret; 
-    SQLRETURN ret2; 
-    #define BufferLength 512
-    char x[BufferLength] = "\0"; /* Para guardar el productcode (input del usuario) */
-    char y[BufferLength] = "\0"; /* Para guardar el quantityinstock (resultado) */
-
-    /* CONNECT */
-    ret = odbc_connect(&env, &dbc);
-    if (!SQL_SUCCEEDED(ret)) {
-        printf("Error al conectar a la BD\n");
-        return;
-    }
-
-    /* Allocate a statement handle */
-    ret = SQLAllocHandle(SQL_HANDLE_STMT, dbc, &stmt);
-    if (!SQL_SUCCEEDED(ret)) {
-        odbc_extract_error("", stmt, SQL_HANDLE_ENV);
-        odbc_disconnect(env, dbc);
-        return;
-    }
-
-    /* Pide el productcode al usuario (como pedía x) */
-    printf("Introduce el identificador del producto > ");
-    (void) fflush(stdout);
-
-    /* Comprueba que haya input para ejecutar la query */
-    if (fgets(x, (int) sizeof(x), stdin) != NULL) {
-        char query[BufferLength + 100];
-
-        x[strcspn(x, "\n")] = 0;
-
-        (void) snprintf(query, sizeof(query), "SELECT quantityinstock FROM products WHERE productcode = '%s';", x);
-
-        (void) SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
-
-        /* Asignamos a 'y' la primera columna seleccionada (quantityinstock) como texto */
-        (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) y, BufferLength , NULL);
-
-        printf("\n--- RESULTADO ---\n");
-        int encontrado = 0;
-        
-        while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-            printf("Stock disponible: %s unidades\n", y);
-            encontrado = 1;
-        }
-
-        if (!encontrado) {
-            printf("No se encontro el producto con codigo '%s'.\n", x);
-        }
-        printf("-----------------\n\n");
-        
-        ret2 = SQLCloseCursor(stmt);
-        if (!SQL_SUCCEEDED(ret2)) {
-            odbc_extract_error("", stmt, SQL_HANDLE_STMT);
-        }
-    }
-
-    /* free up statement handle */
-    ret2 = SQLFreeHandle(SQL_HANDLE_STMT, stmt);
-    if (!SQL_SUCCEEDED(ret2)) {
-        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
-    }
-
-    /* DISCONNECT */
-    ret = odbc_disconnect(env, dbc);
-    if (!SQL_SUCCEEDED(ret)) {
-        printf("Error al desconectar de la BD\n");
-    }
 }

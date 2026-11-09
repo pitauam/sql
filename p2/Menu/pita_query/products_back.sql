@@ -1,1 +1,0 @@
-/*Back: Permite volver al menu anterior.*/
