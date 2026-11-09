@@ -7,4 +7,4 @@ rios pedidos debe aparecer una  ́unica l ́ınea con la suma de todas las unida
 solicitadas. Ordenar la salida por productcode.*/
 
 
-SELECT products.productname, SUM(orderdetails.quantityordered) AS "unidades totales" FROM orders JOIN orderdetails ON orderdetails.ordernumber = orders.ordernumber JOIN products ON products.productcode = orderdetails.productcode WHERE customers.customernumber = ? GROUP BY products.productcode, products.productname ORDER BY products.productcode 
+SELECT products.productname, SUM(orderdetails.quantityordered) FROM orders JOIN orderdetails ON orderdetails.ordernumber = orders.ordernumber JOIN products ON products.productcode = orderdetails.productcode WHERE orders.customernumber = ? GROUP BY products.productcode, products.productname ORDER BY products.productcode

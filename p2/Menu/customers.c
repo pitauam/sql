@@ -117,18 +117,19 @@ int PrintListProducts(void) {
     SQLHSTMT stmt = NULL;
     int ret; /* odbc.c */
     SQLRETURN ret2; /* ODBC API return status */
-    SQLLEN name_length = SQL_NTS;
+    char input[BufferLength];
     /*numero del customer a buscar*/
     SQLINTEGER customernumber;
     char productos[BufferLength];
-    int numerototalsolicitado;
+    SQLINTEGER numerototalsolicitado;
  
     /*muestra el prompt antes de conectar*/
     printf("Enter customer number > ");
     (void)fflush(stdout);
-    if (fgets((int)customernumber, 0, stdin) == NULL) {
+    if (fgets(input, sizeof(input), stdin) == NULL) {
         return EXIT_FAILURE;
     }
+    customernumber = (SQLINTEGER)atoi(input);
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -143,18 +144,17 @@ int PrintListProducts(void) {
         return ret;
     }
 
-    /* Preparamos la consulta para encontrar el cliente */
+    /*Preparamos la consulta para mostrar los productos del cliente*/
     ret = SQLPrepare(stmt, (SQLCHAR*) 
-        "SELECT products.productname, SUM(orderdetails.quantityordered) AS 'unidades_totales' FROM orders JOIN orderdetails ON orderdetails.ordernumber = orders.ordernumber JOIN products ON products.productcode = orderdetails.productcode WHERE customers.customernumber = ? GROUP BY products.productcode, products.productname ORDER BY products.productcode ", SQL_NTS);
+        "SELECT products.productname, SUM(orderdetails.quantityordered) FROM orders JOIN orderdetails ON orderdetails.ordernumber = orders.ordernumber JOIN products ON products.productcode = orderdetails.productcode WHERE orders.customernumber = ? GROUP BY products.productcode, products.productname ORDER BY products.productcode", SQL_NTS);
         
     if (!SQL_SUCCEEDED(ret)) {
         odbc_extract_error("", stmt, SQL_HANDLE_STMT);
         return EXIT_FAILURE;
     }
 
-    /* Vinculamos el texto buscado a las dos condiciones */
-    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR,
-                           sizeof(customernumber) - 1, 0, customernumber, sizeof(customernumber), &name_length);
+    /*vinculamos el identificador del cliente a ?*/
+    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &customernumber, 0, NULL);
 
     if (!SQL_SUCCEEDED(ret)) {
         odbc_extract_error("", stmt, SQL_HANDLE_STMT);
@@ -170,12 +170,12 @@ int PrintListProducts(void) {
 
     /* Asignamos cada columna al tipo de dato correspondiente */
     (void) SQLBindCol(stmt, 1, SQL_C_CHAR, productos, sizeof(productos), NULL);
-    (void) SQLBindCol(stmt, 2, SQL_INTEGER, numerototalsolicitado, sizeof(numerototalsolicitado), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_SLONG, &numerototalsolicitado, 0, NULL);
 
     
     /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        printf("%s %ld\n", productos, numerototalsolicitado);
+        printf("%s %ld\n", productos, (long)numerototalsolicitado);
     }
 
     ret2 = SQLCloseCursor(stmt);
