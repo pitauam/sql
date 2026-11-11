@@ -14,7 +14,7 @@ int PrintOpen(void) {
     SQLHSTMT stmt = NULL;
     int ret; /* odbc.c */
     SQLRETURN ret2; /* ODBC API return status */
-    char y[BufferLength];
+    char y[BufferLength] = "";
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -83,12 +83,22 @@ int PrintRange(void) {
     SQLRETURN ret2; /* ODBC API return status */
     SQLLEN ind1 = SQL_NTS;
     SQLLEN ind2 = SQL_NTS;
-    char date1[BufferLength];
-    char date2[BufferLength];
+    char date1[BufferLength] = "";
+    char date2[BufferLength] = "";
     char input_line[BufferLength];
-    char ordernumber[BufferLength];
-    char orderdate[BufferLength];
-    char shippedate[BufferLength];
+    char ordernumber[BufferLength] = "";
+    char orderdate[BufferLength] = "";
+    char shippedate[BufferLength] = "";
+
+
+    /* Pedir fechas antes de la conexion */
+    printf("Enter dates (YYYY-MM-DD - YYYY-MM-DD) > ");
+    (void) fflush(stdout);
+    if (fgets(input_line, (int) sizeof(input_line), stdin) != NULL) {
+        input_line[strcspn(input_line, "\r\n")] = '\0'; /* Limpiar el \n */ 
+        /* Separar la entrada en date1 y date2 utilizando el formato con guion */
+        (void) sscanf(input_line, "%s - %s", date1, date2);
+    }
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -103,15 +113,6 @@ int PrintRange(void) {
         return ret;
     }
 
-    /* Pedir fechas */
-    printf("Enter dates (YYYY-MM-DD - YYYY-MM-DD) > ");
-    (void) fflush(stdout);
-    if (fgets(input_line, (int) sizeof(input_line), stdin) != NULL) {
-        input_line[strcspn(input_line, "\r\n")] = '\0'; /* Limpiar el \n */ 
-        /* Separar la entrada en date1 y date2 utilizando el formato con guion */
-        (void) sscanf(input_line, "%s - %s", date1, date2);
-    }
-    
     {
         char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND orderdate <= ? ORDER BY ordernumber";
         
@@ -178,12 +179,12 @@ int PrintDetail(void) {
     int ret; /* odbc.c */
     SQLRETURN ret2; /* ODBC API return status */
     SQLLEN ind1 = SQL_NTS;
-    char ordernumber[BufferLength];
-    char orderdate[BufferLength];
-    char productcode[BufferLength];
-    char status[BufferLength];
-    int quantity;
-    double price;
+    char ordernumber[BufferLength] = "";
+    char orderdate[BufferLength] = "";
+    char productcode[BufferLength] = "";
+    char status[BufferLength] = "";
+    int quantity = 0;
+    double price = 0.0;
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);

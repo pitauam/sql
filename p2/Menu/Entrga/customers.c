@@ -18,10 +18,10 @@ int PrintFindCustomers(void) {
     SQLLEN name_length = SQL_NTS;
     /*nombre del customer a buscar*/
     char search[BufferLength];
-    char customername[BufferLength];
-    char contactfirstname[BufferLength];
-    char contactlastname[BufferLength];
-    SQLINTEGER customernumber;
+    char customername[BufferLength] = "";
+    char contactfirstname[BufferLength] = "";
+    char contactlastname[BufferLength] = "";
+    SQLINTEGER customernumber = 0;
  
     /*muestra el prompt antes de conectar*/
     printf("Enter customer name > ");
@@ -117,8 +117,8 @@ int PrintListProducts(void) {
     char input[BufferLength];
     /*numero del customer a buscar*/
     SQLINTEGER customernumber;
-    char productos[BufferLength];
-    SQLINTEGER numerototalsolicitado;
+    char productos[BufferLength] = "";
+    SQLINTEGER numerototalsolicitado = 0;
  
     /*muestra el prompt antes de conectar*/
     printf("Enter customer number > ");
