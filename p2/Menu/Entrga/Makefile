@@ -33,7 +33,7 @@ dropdb:
 
 restore: createdb
 	@echo restore data base
-	@cat $(DBNAME) | $(PSQL)
+	@cat $(DBNAME).sql | $(PSQL)
 
 menu: menu.o odbc.o customers.o orders.o products.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
