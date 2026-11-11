@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
 #include <sql.h>
 #include <sqlext.h>
@@ -27,7 +26,7 @@ int PrintFindCustomers(void) {
     /*muestra el prompt antes de conectar*/
     printf("Enter customer name > ");
     (void)fflush(stdout);
-    if (fgets(search, sizeof(search), stdin) == NULL) {
+    if (fgets(search, (int)sizeof(search), stdin) == NULL) {
         return EXIT_FAILURE;
     }
     search[strcspn(search, "\r\n")] = '\0';
@@ -55,9 +54,9 @@ int PrintFindCustomers(void) {
     }
 
     /* Vinculamos el texto buscado a las dos condiciones */
-    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sizeof(search) - 1, 0, search, sizeof(search), &name_length);
+    ret = SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, (SQLULEN)(sizeof(search) - 1), 0, search, (SQLLEN)sizeof(search), &name_length);
     if (SQL_SUCCEEDED(ret)) {
-        ret = SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, sizeof(search) - 1, 0, search, sizeof(search), &name_length);
+        ret = SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, (SQLULEN)(sizeof(search) - 1), 0, search, (SQLLEN)sizeof(search), &name_length);
     }
 
     if (!SQL_SUCCEEDED(ret)) {
@@ -73,10 +72,10 @@ int PrintFindCustomers(void) {
     }
 
     /* Asignamos cada columna al tipo de dato correspondiente */
-    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, customername, sizeof(customername), NULL);
-    (void) SQLBindCol(stmt, 2, SQL_C_CHAR, contactfirstname, sizeof(contactfirstname), NULL);
-    (void) SQLBindCol(stmt, 3, SQL_C_CHAR, contactlastname, sizeof(contactlastname), NULL);
-    (void) SQLBindCol(stmt, 4, SQL_C_SLONG, &customernumber, 0, NULL);
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR,   customername, (SQLLEN)sizeof(customername), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_CHAR,   contactfirstname, (SQLLEN)sizeof(contactfirstname), NULL);
+    (void) SQLBindCol(stmt, 3, SQL_C_CHAR, contactlastname, (SQLLEN)sizeof(contactlastname), NULL);
+    (void) SQLBindCol(stmt, 4, SQL_C_SLONG,   &customernumber, 0, NULL);
     
     /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
@@ -106,12 +105,10 @@ int PrintFindCustomers(void) {
         return EXIT_FAILURE;
     }
 
-
     return EXIT_SUCCESS;
 }
 
 int PrintListProducts(void) {
-
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
@@ -126,7 +123,7 @@ int PrintListProducts(void) {
     /*muestra el prompt antes de conectar*/
     printf("Enter customer number > ");
     (void)fflush(stdout);
-    if (fgets(input, sizeof(input), stdin) == NULL) {
+    if (fgets(input, (int)sizeof(input), stdin) == NULL) {
         return EXIT_FAILURE;
     }
     customernumber = (SQLINTEGER)atoi(input);
@@ -169,8 +166,8 @@ int PrintListProducts(void) {
     }
 
     /* Asignamos cada columna al tipo de dato correspondiente */
-    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, productos, sizeof(productos), NULL);
-    (void) SQLBindCol(stmt, 2, SQL_C_SLONG, &numerototalsolicitado, 0, NULL);
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR,   productos, (SQLLEN)sizeof(productos), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_SLONG,   &numerototalsolicitado, 0, NULL);
 
     
     /* Loop through the rows in the result-set */
@@ -204,8 +201,7 @@ int PrintListProducts(void) {
     return EXIT_SUCCESS;
 }
     
-
-int PrintBalance(){
+int PrintBalance(void) {
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
@@ -246,7 +242,7 @@ int PrintBalance(){
     }
 
     /* Vinculamos la ? con la variable entera usando SQL_C_SLONG y SQL_INTEGER */
-    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &customernumber, 0, NULL);
+    (void) SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_SLONG, SQL_INTEGER, 0, 0, &customernumber, 0, NULL);
 
     /* Ejecutamos */
     ret = SQLExecute(stmt);
@@ -260,7 +256,7 @@ int PrintBalance(){
     
     /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        /* Imprime el saldo exactamente con el formato del expect */
+        /* Imprime el saldo*/
         printf("Balance = %.2f\n", balance);
     }
 

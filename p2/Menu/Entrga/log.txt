@@ -1,0 +1,46 @@
+Splint 3.1.2 --- 21 Feb 2021
+
+customers.c: (in function PrintFindCustomers)
+customers.c:75:37: Passed storage customername not completely defined
+    (*customername is undefined): SQLBindCol (..., customername, ...)
+  Storage derivable from a parameter, return value or global is not defined.
+  Use /*@out@*/ to denote passed or returned storage which need not be defined.
+  (Use -compdef to inhibit warning)
+customers.c:76:37: Passed storage contactfirstname not completely defined
+    (*contactfirstname is undefined): SQLBindCol (..., contactfirstname, ...)
+customers.c:77:35: Passed storage contactlastname not completely defined
+    (*contactlastname is undefined): SQLBindCol (..., contactlastname, ...)
+customers.c:78:45: Passed storage &customernumber not completely defined:
+                      SQLBindCol (..., &customernumber, ...)
+customers.c: (in function PrintListProducts)
+customers.c:169:37: Passed storage productos not completely defined (*productos
+                       is undefined): SQLBindCol (..., productos, ...)
+customers.c:170:45: Passed storage &numerototalsolicitado not completely
+                       defined: SQLBindCol (..., &numerototalsolicitado, ...)
+orders.c: (in function PrintOpen)
+orders.c:44:37: Passed storage y not completely defined (*y is undefined):
+                   SQLBindCol (..., (SQLCHAR *)y, ...)
+orders.c: (in function PrintRange)
+orders.c:127:55: Passed storage date1 not completely defined (*date1 is
+                    undefined): SQLBindParameter (..., date1, ...)
+orders.c:128:55: Passed storage date2 not completely defined (*date2 is
+                    undefined): SQLBindParameter (..., date2, ...)
+orders.c:138:37: Passed storage ordernumber not completely defined
+    (*ordernumber is undefined): SQLBindCol (..., (SQLCHAR *)ordernumber, ...)
+orders.c:139:37: Passed storage orderdate not completely defined (*orderdate is
+                    undefined): SQLBindCol (..., (SQLCHAR *)orderdate, ...)
+orders.c:140:37: Passed storage shippedate not completely defined (*shippedate
+                    is undefined): SQLBindCol (..., (SQLCHAR *)shippedate, ...)
+orders.c: (in function PrintDetail)
+orders.c:225:37: Passed storage orderdate not completely defined (*orderdate is
+                    undefined): SQLBindCol (..., (SQLCHAR *)orderdate, ...)
+orders.c:226:37: Passed storage status not completely defined (*status is
+                    undefined): SQLBindCol (..., (SQLCHAR *)status, ...)
+orders.c:227:45: Passed storage &quantity not completely defined:
+                    SQLBindCol (..., &quantity, ...)
+orders.c:228:37: Passed storage &price not completely defined:
+                    SQLBindCol (..., &price, ...)
+orders.c:229:37: Passed storage productcode not completely defined
+    (*productcode is undefined): SQLBindCol (..., (SQLCHAR *)productcode, ...)
+
+Finished checking --- 17 code warnings

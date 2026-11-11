@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
 #include <sql.h>
 #include <sqlext.h>
 #include "odbc.h"
-
 #include "orders.h"
 
-int PrintOpen(){
+#define BufferLength 512
+
+int PrintOpen(void) {
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
     int ret; /* odbc.c */
     SQLRETURN ret2; /* ODBC API return status */
-    char y[BufferLength] = "\0";
+    char y[BufferLength];
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -28,41 +28,35 @@ int PrintOpen(){
         odbc_extract_error("", stmt, SQL_HANDLE_ENV);
         return ret;
     }
-
+    
+    /* pedimos el ordernumber */
     printf("ordernumber");
-
     (void) fflush(stdout);
-    /*comprueba que x sea algo para poder ejecutar la query*/ 
-    char query[BufferLength + 28];
-        /* snprintf is not defined if ansi flag is enabled */
+    
+    {
+        char query[BufferLength + 28];
+        (void) snprintf(query, sizeof(query), "SELECT o.ordernumber FROM orders o WHERE o.shippeddate IS NULL ORDER BY o.ordernumber");
+        printf("%s\n", query);
+        (void) SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
+    }
 
-        /*primer ojo*/
-    (void) snprintf(query, (size_t)(BufferLength + 27), "SELECT o.ordernumber FROM orders o WHERE o.shippeddate IS NULL ORDER BY o.ordernumber");
-        /*copiado de la pizarra, lo ha pedido la profe*/
-    printf("%s\n",query);
+    /* aqui se asigna a y la columna seleccionada en el select */
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR,   (SQLCHAR*) y, (SQLLEN)sizeof(y), NULL);
 
-    (void) SQLExecDirect(stmt, (SQLCHAR*) query, SQL_NTS);
-
-        /*aqui se asigna a y la columna seleccionada en el select*/
-    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) y, BufferLength , NULL);
-
-        /* Loop through the rows in the result-set */
+    /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        /*imprime cada row*/
+        /* imprime cada row */
         printf("%15s\n", y);
     }
 
-        /*segundo ojo, primero error de sintaxis y segundo no funciona*/
-        
     ret2 = SQLCloseCursor(stmt);
     if (!SQL_SUCCEEDED(ret2)) {
         odbc_extract_error("", stmt, SQL_HANDLE_STMT);
         return ret;
     }
 
-        /*limpiar*/
+    /* limpiar */
     ret = fflush(stdout);
-    
     printf("\n");
     
     /* free up statement handle */
@@ -81,7 +75,7 @@ int PrintOpen(){
     return EXIT_SUCCESS;
 }
 
-int PrintRange(){
+int PrintRange(void) {
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
@@ -89,12 +83,12 @@ int PrintRange(){
     SQLRETURN ret2; /* ODBC API return status */
     SQLLEN ind1 = SQL_NTS;
     SQLLEN ind2 = SQL_NTS;
-    char date1[BufferLength] = "\0";
-    char date2[BufferLength] = "\0";
-    char input_line[BufferLength] = "\0";
-    char ordernumber[BufferLength] = "\0";
-    char orderdate[BufferLength] = "\0";
-    char shippedate[BufferLength] = "\0";
+    char date1[BufferLength];
+    char date2[BufferLength];
+    char input_line[BufferLength];
+    char ordernumber[BufferLength];
+    char orderdate[BufferLength];
+    char shippedate[BufferLength];
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -109,27 +103,29 @@ int PrintRange(){
         return ret;
     }
 
-    /* Pedir fechas en el formato requerido por el expect */
+    /* Pedir fechas */
     printf("Enter dates (YYYY-MM-DD - YYYY-MM-DD) > ");
     (void) fflush(stdout);
     if (fgets(input_line, (int) sizeof(input_line), stdin) != NULL) {
-        input_line[strcspn(input_line, "\r\n")] = 0; /* Limpiar el \n */ 
-        /* Separar la entrada en date1 y date2 utilizando el guión como separador */
-        sscanf(input_line, "%s - %s", date1, date2);
+        input_line[strcspn(input_line, "\r\n")] = '\0'; /* Limpiar el \n */ 
+        /* Separar la entrada en date1 y date2 utilizando el formato con guion */
+        (void) sscanf(input_line, "%s - %s", date1, date2);
     }
     
-    char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND orderdate <= ? ORDER BY ordernumber";
-    
-    /* preparamos la consulta */
-    ret = SQLPrepare(stmt, (SQLCHAR*) query, SQL_NTS);
-    if (!SQL_SUCCEEDED(ret)) {
-        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
-        return EXIT_FAILURE;
+    {
+        char query[] = "SELECT ordernumber, orderdate, shippeddate FROM orders WHERE orderdate >= ? AND orderdate <= ? ORDER BY ordernumber";
+        
+        /* preparamos la consulta */
+        ret = SQLPrepare(stmt, (SQLCHAR*) query, SQL_NTS);
+        if (!SQL_SUCCEEDED(ret)) {
+            odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+            return EXIT_FAILURE;
+        }
     }
 
     /* vinculamos las ? con las variables */
-    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, date1, sizeof(date1), &ind1);
-    SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, date2, sizeof(date2), &ind2);
+    (void) SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, date1, (SQLLEN)sizeof(date1), &ind1);
+    (void) SQLBindParameter(stmt, 2, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, date2, (SQLLEN)sizeof(date2), &ind2);
 
     /* Ejecutamos */
     ret = SQLExecute(stmt);
@@ -139,13 +135,13 @@ int PrintRange(){
     }
 
     /* Asignar las columnas seleccionadas en el select */
-    (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) ordernumber, BufferLength, NULL);
-    (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) orderdate, BufferLength, NULL);
-    (void) SQLBindCol(stmt, 3, SQL_C_CHAR, (SQLCHAR*) shippedate, BufferLength, NULL);
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR,   (SQLCHAR*) ordernumber, (SQLLEN)sizeof(ordernumber), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_CHAR,   (SQLCHAR*) orderdate, (SQLLEN)sizeof(orderdate), NULL);
+    (void) SQLBindCol(stmt, 3, SQL_C_CHAR,   (SQLCHAR*) shippedate, (SQLLEN)sizeof(shippedate), NULL);
 
     /* Loop through the rows in the result-set */
     while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-        /* Imprimir cada row sin cabeceras y con formato plano para el expect */
+        /* Imprimir cada row */
         printf("%s %s %s\n", ordernumber, orderdate, shippedate);
     }
         
@@ -156,8 +152,7 @@ int PrintRange(){
     }
 
     /* limpiar */
-    (void) fflush(stdout);
-
+    ret = fflush(stdout);
     printf("\n");
     
     /* free up statement handle */
@@ -176,20 +171,19 @@ int PrintRange(){
     return EXIT_SUCCESS;
 }
 
-int PrintDetail(){
+int PrintDetail(void) {
     SQLHENV env = NULL;
     SQLHDBC dbc = NULL;
     SQLHSTMT stmt = NULL;
     int ret; /* odbc.c */
     SQLRETURN ret2; /* ODBC API return status */
     SQLLEN ind1 = SQL_NTS;
-    char ordernumber[BufferLength] = "\0";
-    char orderdate[BufferLength] = "\0";
-    char productcode[BufferLength] = "\0";
-    char status[BufferLength] = "\0";
+    char ordernumber[BufferLength];
+    char orderdate[BufferLength];
+    char productcode[BufferLength];
+    char status[BufferLength];
     int quantity;
     double price;
-
 
     /* CONNECT */
     ret = odbc_connect(&env, &dbc);
@@ -203,25 +197,22 @@ int PrintDetail(){
         odbc_extract_error("", stmt, SQL_HANDLE_ENV);
         return ret;
     }
-    /*pide x*/
-
 
     printf("Enter ordernumber > ");
     (void) fflush(stdout);
     if (fgets(ordernumber, (int) sizeof(ordernumber), stdin) != NULL) {
-        ordernumber[strcspn(ordernumber, "\r\n")] = 0; /*Limpiar el \n*/ 
+        ordernumber[strcspn(ordernumber, "\r\n")] = '\0'; /* Limpiar el \n */ 
     }
     
-    
     /* preparamos la consulta */
-    ret = SQLPrepare(stmt, (SQLCHAR*) "SELECT o.orderdate, o.status, od.quantityordered, od.priceeach, od.productcode FROM orders o JOIN orderdetails od ON o.ordernumber = od.ordernumber WHERE od.ordernumber = ? ORDER BY od.orderlinenumber; ", SQL_NTS);
+    ret = SQLPrepare(stmt, (SQLCHAR*) "SELECT o.orderdate, o.status, od.quantityordered, od.priceeach, od.productcode FROM orders o JOIN orderdetails od ON o.ordernumber = od.ordernumber WHERE od.ordernumber = ? ORDER BY od.orderlinenumber;", SQL_NTS);
     if (!SQL_SUCCEEDED(ret)) {
         odbc_extract_error("", stmt, SQL_HANDLE_STMT);
         return EXIT_FAILURE;
     }
 
     /* vinculamos las ? con las variables */
-    SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, ordernumber, sizeof(ordernumber), &ind1);
+    (void) SQLBindParameter(stmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 10, 0, ordernumber, (SQLLEN)sizeof(ordernumber), &ind1);
 
     /* Ejecutamos */
     ret = SQLExecute(stmt);
@@ -229,31 +220,27 @@ int PrintDetail(){
         odbc_extract_error("", stmt, SQL_HANDLE_STMT);
         return EXIT_FAILURE;
     }
-        /*aqui se asigna a y la columna seleccionada en el select*/
-        (void) SQLBindCol(stmt, 1, SQL_C_CHAR, (SQLCHAR*) orderdate, BufferLength , NULL);
-        (void) SQLBindCol(stmt, 2, SQL_C_CHAR, (SQLCHAR*) status, BufferLength , NULL);
-        (void) SQLBindCol(stmt, 3, SQL_C_SLONG, &quantity, 0 , NULL);
-        (void) SQLBindCol(stmt, 4, SQL_C_DOUBLE, &price, 0 , NULL);
-        (void) SQLBindCol(stmt, 5, SQL_C_CHAR, (SQLCHAR*) productcode, BufferLength , NULL);
-        
-        /* Loop through the rows in the result-set */
-        while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
-            /*imprime cada row*/
-            printf("%15s %d %.2f\n", productcode, quantity, price);
 
-        }
+    /* aqui se asigna a las variables la columna seleccionada en el select */
+    (void) SQLBindCol(stmt, 1, SQL_C_CHAR,   (SQLCHAR*) orderdate, (SQLLEN)sizeof(orderdate), NULL);
+    (void) SQLBindCol(stmt, 2, SQL_C_CHAR,   (SQLCHAR*) status, (SQLLEN)sizeof(status), NULL);
+    (void) SQLBindCol(stmt, 3, SQL_C_SLONG,   &quantity, 0, NULL);
+    (void) SQLBindCol(stmt, 4, SQL_C_DOUBLE,   &price, 0, NULL);
+    (void) SQLBindCol(stmt, 5, SQL_C_CHAR,   (SQLCHAR*) productcode, (SQLLEN)sizeof(productcode), NULL);
+    
+    /* Loop through the rows in the result-set */
+    while (SQL_SUCCEEDED(ret = SQLFetch(stmt))) {
+        printf("%15s %d %.2f\n", productcode, quantity, price);
+    }
 
-        /*segundo ojo, primero error de sintaxis y segundo no funciona*/
-        
-        ret2 = SQLCloseCursor(stmt);
-        if (!SQL_SUCCEEDED(ret2)) {
-            odbc_extract_error("", stmt, SQL_HANDLE_STMT);
-           return ret;
-        }
+    ret2 = SQLCloseCursor(stmt);
+    if (!SQL_SUCCEEDED(ret2)) {
+        odbc_extract_error("", stmt, SQL_HANDLE_STMT);
+        return ret;
+    }
 
-        /*limpiar*/
-        ret = fflush(stdout);
-
+    /* limpiar */
+    ret = fflush(stdout);
     printf("\n");
     
     /* free up statement handle */
@@ -271,4 +258,3 @@ int PrintDetail(){
 
     return EXIT_SUCCESS;
 }
-
