@@ -125,3 +125,23 @@ el tester llama 1 a 1 todos los bloques de funciones que hay que implementar y d
 ora funcion que hay que hacer es imprimir: para imprimir el arbol de indices en pantalla
 
 Hay que implementar las funciones de tester.c
+
+
+NOTA: son ficheros BINARIOS. para mostrar el contenido no vale con doble click. hayq usar los fopen con "b" para que no falle el tester. br bw ba
+
+
+
+
+
+DIVIDIR TRABAJO:
+
+PITA:
+3.1.1: createTable
+3.1.3: findKey
+3.1.4: addTableEntry
+
+
+MARIO:
+3.1.1: createIndex
+3.1.2: printTree
+3.1.4: addIndexEntry
