@@ -73,3 +73,55 @@ https://www.dpriver.com/pp/sqlformat.htm
 
 GRAFICA DE BBDD:
 https://www.mysqltutorial.org/getting-started-with-mysql/mysql-sample-database/
+
+
+
+
+
+
+
+
+------------------P3:------------------
+
+Crear tablas (el fichero de los datos y el fichero de indice)
+insertar registros
+"borrar" (prestar atencion al indice)
+indice (ficheros idx,ddx)
+busqueda binaria (indices ordenados)
+
+para abrir ficheros binarios hay que usar fopen con la opcion "b". fseek para colocarte donde quieres con el offset. SEEK_END/offset
+fwrite y fread son las que vamos a usar
+ftell para decirle en la posicion que me he quedado
+
+se abre, se posiciona (fseek donde corresponda), escribo (o leo), y cierro(quedandome en la posicion en donde estoy)
+
+por ej: para buscar el id4 NO se hace busqueda lineal, se hace busqueda binaria. para ello se usa un arbol (llamado índice)
+el indice utiliza el identificador para componerse.
+
+el algoritmo de busqueda binaria nos lo dan hecho
+
+
+primer escenario: Se deja el borrado para el segundo paso. como no tengo nada borrado:
+
+
+PARA EL REGISTRO(insertar el primero):
+existe el libro?  lo busco con busqueda binaria en el indice y miro donde lo coloco. para colocar el indice tiene que estar ordenado. una vez ordenado, se inserta al final (no tengo borrados)
+la complejidad está en el indice, no en el registro
+
+
+si no existe entonces, lo meto en el indice y el registro:
+    fopen, me voy al final (fseek SEEK_END), meto el libro en cuestion(fwrite) y uso el ftell para decir donde me he quedado
+
+PARA EL INDICE (sin borrado primero, se copia al final.):
+un puntero a la lista de todas las cosas borradas. si 
+
+
+nota: fwrite tiene que ser igual al fread
+
+
+
+el tester llama 1 a 1 todos los bloques de funciones que hay que implementar y dice lo que hay que hacer EN ORDEN. Lo chequea mirando el tamaño
+
+ora funcion que hay que hacer es imprimir: para imprimir el arbol de indices en pantalla
+
+Hay que implementar las funciones de tester.c
