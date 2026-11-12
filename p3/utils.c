@@ -7,7 +7,38 @@ void replaceExtensionByIdx(const char *fileName, char * indexName) {
 }
 
 
+/*tableName es el nombre del fichero*/
 bool createTable(const char * tableName) {
+    FILE *pF = NULL;
+    int number = -1;
+
+    if (!tableName){
+        return false;
+    }
+
+    /*intenta abrirlo*/
+    pF = (FILE*)fopen(tableName, "rb");
+    /*si no existe lo crea*/
+    if (!pF){
+
+        pF = (FILE*)fopen(tableName, "wb");
+        if (!pF){
+            return false;
+        }
+        /*inicializa la cabecera a -1, en binario*/
+        if (fwrite(&number, sizeof(int), 1, pF) != 1){
+            fclose(pF);
+            return false;
+        }
+        
+        /*crea fichero de indices si es necesario*/
+        createIndex(tableName);
+        fclose(pF);
+        return true;
+    }
+
+    fclose(pF);
+
     return true;
     }
 
