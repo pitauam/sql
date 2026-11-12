@@ -12,6 +12,23 @@ bool createTable(const char * tableName) {
     }
 
 bool createIndex(const char *indexName) {
+
+    FILE *fi = NULL;
+    char newname[len(indexName)];
+    char ext[5] = ".idx";
+
+    if(!indexName){
+        return false;
+    }
+
+    if(!(fi = (FILE*)fopen(indexName, "rb"))){
+        if(!(fi = (FILE*)fopen(indexName, "wb"))){
+            return false;
+        }
+        
+
+    }
+
     return true;
 }
 void printnode(size_t _level, size_t level,
