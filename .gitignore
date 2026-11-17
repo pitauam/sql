@@ -7,3 +7,7 @@ odbc-example2
 odbc-example3
 odbc-example4
 menu
+
+tester
+test_create_index
+test_create_table

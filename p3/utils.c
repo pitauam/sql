@@ -40,7 +40,7 @@ bool createTable(const char * tableName) {
     fclose(pF);
 
     return true;
-    }
+}
 
 bool createIndex(const char *indexName) {
     return true;
