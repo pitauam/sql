@@ -55,10 +55,28 @@ void printTree(size_t level, const char * indexName)
     return;
 }
 
+/*nodeIDOrDataOffset es el id del ultimo nodo visitado si no se encuentra la clave (el punto de inserción de la clave buscada); y el offset del registro si se encuentra*/
 bool findKey(const char * book_id, const char *indexName,
              int * nodeIDOrDataOffset)
  {
-     return true;
+    FILE *pF = NULL;
+
+    if (!book_id || !indexName || !nodeIDOrDataOffset){
+        return false;
+    }
+
+    /*intenta abrirlo*/
+    pF = (FILE*)fopen(indexName, "rb");
+    /*si no existe, es false*/
+    if (!pF){
+        /*si no existe el punto de insercion es 0*/
+        *nodeIDOrDataOffset = 0;
+        return false;
+    }
+
+    fclose(pF);
+
+    return true;
  }
 
 bool addIndexEntry(char * book_id,  int bookOffset, char const * indexName) {

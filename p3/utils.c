@@ -55,6 +55,16 @@ void printTree(size_t level, const char * indexName)
     return;
 }
 
+/*3.1.3. Funci ́on findKey
+Dada una clave book id, findKey devolver ́a true si se ha encontrado la
+clave en el  ́ındice y false en caso contrario. Adicionalmente, almacenar ́a en
+el par ́ametro nodeIDOrDataOffset el identificador del  ́ultimo nodo visitado
+si no se ha encontrado la clave o, el offset del registro de datos si se ha
+encontrado la clave. N ́otese que en el primer caso, cuando la clave no ha sido
+encontrada, el nodo devuelto ser ́ıa el punto de inserci ́on de la clave buscada
+si quisi ́eramos insertarla en el  ́arbol.
+*/
+/*nodeIDOrDataOffset es el id del ultimo nodo visitado si no se encuentra la clave (el punto de inserción de la clave buscada); y el offset del registro si se encuentra*/
 bool findKey(const char * book_id, const char *indexName,
              int * nodeIDOrDataOffset)
  {
