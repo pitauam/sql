@@ -55,21 +55,95 @@ void printTree(size_t level, const char * indexName)
     return;
 }
 
-/*3.1.3. Funci ́on findKey
-Dada una clave book id, findKey devolver ́a true si se ha encontrado la
-clave en el  ́ındice y false en caso contrario. Adicionalmente, almacenar ́a en
-el par ́ametro nodeIDOrDataOffset el identificador del  ́ultimo nodo visitado
-si no se ha encontrado la clave o, el offset del registro de datos si se ha
-encontrado la clave. N ́otese que en el primer caso, cuando la clave no ha sido
-encontrada, el nodo devuelto ser ́ıa el punto de inserci ́on de la clave buscada
-si quisi ́eramos insertarla en el  ́arbol.
-*/
 /*nodeIDOrDataOffset es el id del ultimo nodo visitado si no se encuentra la clave (el punto de inserción de la clave buscada); y el offset del registro si se encuentra*/
 bool findKey(const char * book_id, const char *indexName,
              int * nodeIDOrDataOffset)
- {
-     return true;
- }
+{
+    FILE *pF;
+
+    int root;
+    int current;
+    int comparison;
+    long fileSize;
+    long nodeCount;
+    long visited;
+    long nodePosition;
+    Node node;
+
+    if (!book_id || !indexName || !nodeIDOrDataOffset){
+        return false;
+    }
+
+    /*por defecto se pone a -1*/
+    *nodeIDOrDataOffset = -1;
+    pF = fopen(indexName, "rb");
+    if (!pF){
+        return false;
+    }
+
+    /*se comprueba que hay un header*/
+    if (fseek(pF, 0L, SEEK_END) != 0){
+        fclose(pF);
+        return false;
+    }
+    
+    /*tamaño del archivo*/
+    fileSize = ftell(pF);
+    /*comprueba que el nodo tenga el tamaño valido*/
+    if (fileSize < INDEX_HEADER_SIZE || (fileSize - INDEX_HEADER_SIZE) % (long)sizeof(Node) != 0){
+        fclose(pF);
+        return false;
+    }
+
+    nodeCount = (fileSize - INDEX_HEADER_SIZE) / (long)sizeof(Node);
+
+    if (fseek(pF, 0L, SEEK_SET) != 0 || fread(&root, sizeof(root), 1, pF) != 1){
+        fclose(pF);
+        return false;
+    }
+
+    /*si la raiz es -1, el arbol está vacío*/
+    if (root == NO_DELETED_REGISTERS){
+        fclose(pF);
+        return false;
+    }
+
+    current = root;
+    visited = 0;
+    while (current != NO_DELETED_REGISTERS)
+    {
+        if (current < 0 || (long)current >= nodeCount || visited >= nodeCount){
+            fclose(pF);
+            return false;
+        }
+
+        nodePosition = INDEX_HEADER_SIZE + (long)current * (long)sizeof(Node);
+        if (fseek(pF, nodePosition, SEEK_SET) != 0 || fread(&node, sizeof(node), 1, pF) != 1){
+            fclose(pF);
+            return false;
+        }
+
+        visited++;
+
+        comparison = memcmp(book_id, node.book_id, PK_SIZE);
+        if (comparison == 0){
+            *nodeIDOrDataOffset = node.offset;
+            fclose(pF);
+            return true;
+        }
+
+        /*si no está se devuelve el ultimo nodo que se ha vistiado*/
+        *nodeIDOrDataOffset = current;
+        if (comparison < 0){
+            current = node.left;
+        } else {
+            current = node.right;
+        }
+    }
+
+    fclose(pF);
+    return false;
+}
 
 bool addIndexEntry(char * book_id,  int bookOffset, char const * indexName) {
     return true;
