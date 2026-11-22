@@ -43,16 +43,109 @@ bool createTable(const char * tableName) {
 }
 
 bool createIndex(const char *indexName) {
+        
+    if (!indexName) {
+        return false;
+    }
+
+    size_t len = strlen(indexName);
+    if (len < 4) {
+        return false;
+    }
+
+    FILE *fi = NULL;
+    int number = -1;
+    char newname[len + 1];
+
+    /* Construimos el nombre con extensión .idx */
+    strcpy(newname, indexName);
+    strcpy(&newname[len - 4], ".idx");
+
+    /*Comprobamos si el fichero .idx ya está creado */
+    if (!(fi = fopen(newname, "rb"))) {
+        /* creamos el nuevo fichero */
+        if (!(fi = fopen(newname, "wb"))) {
+            return false;
+        }
+
+        /* Inicializamos la cabecera con dos enteros iguales a -1 */
+        if (fwrite(&number, sizeof(int), 1, fi) != 1) {
+            fclose(fi);
+            return false;
+        }
+
+        if (fwrite(&number, sizeof(int), 1, fi) != 1) {
+            fclose(fi);
+            return false;
+        }
+    }
+
+    /*Cerramos el fichero */
+    fclose(fi);
+
     return true;
 }
-void printnode(size_t _level, size_t level,
-               FILE * indexFileHandler, int node_id, char side) {
-    return;
+void printnode(size_t _level, size_t level, FILE *indexFileHandler, int node_id, char side) {
+    
+    /*Comprobamos errores de entrada*/
+    if (!indexFileHandler || node_id == -1 || _level > level) {
+        return;
+    }
+
+    Node node;
+    size_t i;
+    long offset = (long)node_id * sizeof(Node) + INDEX_HEADER_SIZE;
+
+    /*Nos posicionamos en el nodo*/
+    if (fseek(indexFileHandler, offset, SEEK_SET) != 0) {
+        return;
+    }
+    /*Sacamos la informacion del nodo*/
+    if (fread(&node, sizeof(Node), 1, indexFileHandler) != 1) {
+        return;
+    }
+
+    for (i = 0; i < _level; i++) {
+        printf("    ");
+    }
+
+    if (_level == 0) {
+        printf("%.4s (%d): %d\n", node.book_id, node_id, node.offset);
+    } else {
+        printf("%c %.4s (%d): %d\n", side, node.book_id, node_id, node.offset);
+    }
+
+    /*hacemos recursividad*/
+    printnode(_level + 1, level, indexFileHandler, node.left, 'l');
+    printnode(_level + 1, level, indexFileHandler, node.right, 'r');
 }
 
-void printTree(size_t level, const char * indexName)
-{
-    return;
+void printTree(size_t level, const char *indexName) {
+    if (!indexName) {
+        return;
+    }
+
+    FILE *fi = fopen(indexName, "rb");
+    if (!fi) {
+        return;
+    }
+
+    int raiz;
+    if (fread(&raiz, sizeof(int), 1, fi) != 1) {
+        fclose(fi);
+        return;
+    }
+
+   /*comprobamos si esta vacio*/
+    if (raiz == -1) {
+        fclose(fi);
+        return;
+    }
+
+    /*imprimimos el primer nodo llamando a printnode*/
+    printnode(0, level, fi, raiz, ' ');
+
+    fclose(fi);
 }
 
 /*nodeIDOrDataOffset es el id del ultimo nodo visitado si no se encuentra la clave (el punto de inserción de la clave buscada); y el offset del registro si se encuentra*/
