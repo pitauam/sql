@@ -180,7 +180,7 @@ bool addTableEntry(Book * book, const char * dataName,
         return false;
     }
 
-    /*la longitud guardada en disco es un int y no incluye el '\0' final*/
+    /*la longitud guardada en disco es un int y no incluye el \0 final*/
     titleLengthSize = strlen(book->title);
     if (titleLengthSize > (size_t)INT_MAX){
         return false;
@@ -284,8 +284,8 @@ bool addTableEntry(Book * book, const char * dataName,
         return false;
     }
 
-    /*escribe clave, longitud y contenido sin guardar el '\0'*/
-    /* fseek coloca el cursor en el hueco elegido o al final del fichero. */
+    /*escribe clave, longitud y contenido sin guardar el \0*/
+    /* fseek coloca el cursor en el hueco elegido o al final del fichero*/
     if (fseek(dataFile, insertOffset, SEEK_SET) != 0 ||
         fwrite(book->book_id, PK_SIZE, 1, dataFile) != 1 ||
         fwrite(&titleLength, sizeof(titleLength), 1, dataFile) != 1 ||
