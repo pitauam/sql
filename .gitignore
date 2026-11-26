@@ -27,3 +27,5 @@ test_add_table_entry.idx
 myDataBase.dat
 myDataBase.idx
 file.txt
+*.idx
+interface

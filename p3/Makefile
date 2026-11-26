@@ -26,7 +26,7 @@ clean :
 		test.idx test_table.dat test_table.idx \
 		test_print.idx test_find_key.idx test_add_index_entry.idx \
 		test_add_table_entry.dat test_add_table_entry.idx \
-		myDataBase.dat myDataBase.idx file.txt
+		myDataBase.dat myDataBase.idx file.txt interface
 
 # a partir de aqui son todos tests individuales
 
@@ -75,3 +75,6 @@ alltests:
 	make test_find_key
 	make test_add_index_entry
 	make test_add_table_entry
+
+inferface: inferface.c utils.c utils.h
+	$(CC) $(CFLAGS) -o inferface inferface.c utils.c
