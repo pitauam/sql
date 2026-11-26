@@ -3,7 +3,17 @@
 int no_deleted_registers = NO_DELETED_REGISTERS;
 
 void replaceExtensionByIdx(const char *fileName, char * indexName) {
-    return;
+        if (!fileName || !indexName) {
+        return;
+    }
+
+    size_t len = strlen(fileName);
+    if (len < 4) {
+        return;
+    }
+
+    strcpy(indexName, fileName);
+    strcpy(&indexName[len - 4], ".idx");
 }
 
 
@@ -43,7 +53,7 @@ bool createTable(const char * tableName) {
 }
 
 bool createIndex(const char *indexName) {
-        
+
     if (!indexName) {
         return false;
     }
@@ -57,9 +67,12 @@ bool createIndex(const char *indexName) {
     int number = -1;
     char newname[len + 1];
 
-    /* Construimos el nombre con extensión .idx */
-    strcpy(newname, indexName);
-    strcpy(&newname[len - 4], ".idx");
+    /* llamamos a replaceExtension*/
+    replaceExtensionByIdx(indexName, newname);
+
+    if(!newname){
+        return false;
+    }
 
     /*Comprobamos si el fichero .idx ya está creado */
     if (!(fi = fopen(newname, "rb"))) {
@@ -118,6 +131,8 @@ void printnode(size_t _level, size_t level, FILE *indexFileHandler, int node_id,
     /*hacemos recursividad*/
     printnode(_level + 1, level, indexFileHandler, node.left, 'l');
     printnode(_level + 1, level, indexFileHandler, node.right, 'r');
+
+    return;
 }
 
 void printTree(size_t level, const char *indexName) {
@@ -146,6 +161,8 @@ void printTree(size_t level, const char *indexName) {
     printnode(0, level, fi, raiz, ' ');
 
     fclose(fi);
+
+    return;
 }
 
 /*nodeIDOrDataOffset es el id del ultimo nodo visitado si no se encuentra la clave (el punto de inserción de la clave buscada); y el offset del registro si se encuentra*/
@@ -239,8 +256,100 @@ bool findKey(const char * book_id, const char *indexName,
 }
 
 bool addIndexEntry(char * book_id,  int bookOffset, char const * indexName) {
+    if (!book_id || !indexName) {
+        return false;
+    }
+
+    int parentID = -1;
+    long offset = PK_SIZE + 4 * sizeof(int);
+
+    /* Comprobamos si la clave ya existe y obtenemos su futuro nodo padre */
+    if (findKey(book_id, indexName, &parentID)) {
+        return false; /* ya existe */
+    }
+
+    FILE *fp = fopen(indexName, "r+b");
+    if (!fp) {
+        return false;
+    }
+
+    /* Leemos la cabecera del índice */
+    int root = -1;
+    int deleted = -1;
+    fread(&root, sizeof(int), 1, fp);
+    fread(&deleted, sizeof(int), 1, fp);
+
+    /* Miramos en qué posición se escribirá el nuevo nodo */
+    int newNodeID = -1;
+    if (deleted != NO_DELETED_REGISTERS) {
+        /* Reutilizamos el primer nodo de la lista de borrados */
+        newNodeID = deleted;
+        long deletedOffset = INDEX_HEADER_SIZE + (long)newNodeID * offset;
+        
+        /* Leemos el puntero al siguiente nodo borrado (está después de los 4 bytes de PK) */
+        int nextDeleted = -1;
+        fseek(fp, deletedOffset + PK_SIZE, SEEK_SET);
+        fread(&nextDeleted, sizeof(int), 1, fp);
+        
+        fseek(fp, sizeof(int), SEEK_SET); 
+        fwrite(&nextDeleted, sizeof(int), 1, fp);
+    } else {
+        /* Añadimos al final del fichero */
+        fseek(fp, 0, SEEK_END);
+        long fileSize = ftell(fp);
+        newNodeID = (fileSize - INDEX_HEADER_SIZE) / offset;
+    }
+
+    /* Preparamos la estructura del nuevo nodo */
+    Node newNode;
+    memcpy(newNode.book_id, book_id, PK_SIZE);
+    newNode.left = -1;
+    newNode.right = -1;
+    newNode.parent = parentID;
+    newNode.offset = bookOffset;
+
+    /* Escribimos el nuevo nodo en disco */
+    long newNodeOffset = INDEX_HEADER_SIZE + (long)newNodeID * offset;
+    fseek(fp, newNodeOffset, SEEK_SET);
+    fwrite(newNode.book_id, PK_SIZE, 1, fp);
+    fwrite(&newNode.left, sizeof(int), 1, fp);
+    fwrite(&newNode.right, sizeof(int), 1, fp);
+    fwrite(&newNode.parent, sizeof(int), 1, fp);
+    fwrite(&newNode.offset, sizeof(int), 1, fp);
+
+    /* Actualizamos el árbol */
+    if (root == -1) {
+        /* Como está vacío pasa a ser la raíz */
+        fseek(fp, 0, SEEK_SET);
+        fwrite(&newNodeID, sizeof(int), 1, fp);
+    } else {
+        /* Lee el nodo padre para enlazarlo con el nuevo hijo */
+        Node parentNode;
+        long parentOffset = INDEX_HEADER_SIZE + (long)parentID * offset;
+        fseek(fp, parentOffset, SEEK_SET);
+        fread(parentNode.book_id, PK_SIZE, 1, fp);
+        fread(&parentNode.left, sizeof(int), 1, fp);
+        fread(&parentNode.right, sizeof(int), 1, fp);
+        fread(&parentNode.parent, sizeof(int), 1, fp);
+        fread(&parentNode.offset, sizeof(int), 1, fp);
+
+        /* Comparamos las claves */
+        if (strncmp(book_id, parentNode.book_id, PK_SIZE) < 0) {
+            parentNode.left = newNodeID;
+        } else {
+            parentNode.right = newNodeID;
+        }
+
+        /* Reescribimos los punteros left y right */
+        fseek(fp, parentOffset + PK_SIZE, SEEK_SET);
+        fwrite(&parentNode.left, sizeof(int), 1, fp);
+        fwrite(&parentNode.right, sizeof(int), 1, fp);
+    }
+
+    fclose(fp);
     return true;
 }
+
 
 bool addTableEntry(Book * book, const char * dataName,
                    const char * indexName) {
