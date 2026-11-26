@@ -1,0 +1,19 @@
+CC = gcc
+CFLAGS = -g -Wall -Wextra -pedantic -ansi
+
+INTERFACE = interface
+SOURCES = interface.c utils.c
+HEADERS = utils.h
+
+.PHONY: all run clean
+
+all: $(INTERFACE)
+
+$(INTERFACE): $(SOURCES) $(HEADERS)
+	$(CC) $(CFLAGS) -o $(INTERFACE) $(SOURCES)
+
+run: $(INTERFACE)
+	./$(INTERFACE)
+
+clean:
+	rm -f $(INTERFACE)
