@@ -76,5 +76,5 @@ alltests:
 	make test_add_index_entry
 	make test_add_table_entry
 
-inferface: inferface.c utils.c utils.h
-	$(CC) $(CFLAGS) -o inferface inferface.c utils.c
+interface: interface.c utils.c utils.h
+	$(CC) $(CFLAGS) -o interface interface.c utils.c

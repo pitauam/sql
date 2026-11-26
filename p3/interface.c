@@ -9,12 +9,9 @@
 
 /* Prototypes */
 static int ShowMainMenu(void);
-static void ShowProductsMenu(void);
-static int ShowProductsSubMenu(void);
-static void ShowOrdersMenu(void);
-static int ShowOrdersSubMenu(void);
-static void ShowCustomersMenu(void);
-static int ShowCustomersSubMenu(void);
+static void useTable(void);
+static void insertTableEntry(void);
+static void printIndexTree(void);
 
 static char selectedTable[MENU_NAME_LENGTH];
 static char selectedIndex[MENU_NAME_LENGTH];
@@ -49,13 +46,13 @@ int main(void) {
         nChoice = ShowMainMenu();
         switch (nChoice) {
             case 1:
-                ShowProductsMenu();
+                useTable();
                 break;
             case 2:
-                ShowOrdersMenu();
+                insertTableEntry();
                 break;
             case 3:
-                ShowCustomersMenu();
+                printIndexTree();
                 break;
             case 4:
                 printf("Closing...\n\n");
@@ -96,9 +93,9 @@ int ShowMainMenu(void) {
 
 
 /**
- * @brief Shows and processes the products menu.
+ * @brief Selecciona una tabla y crea sus archivos si no existen.
  */
-void ShowProductsMenu(void) {
+void useTable(void) {
     char tableName[MENU_NAME_LENGTH];
 
     readLine("Table name: ", tableName, sizeof(tableName));
@@ -120,17 +117,9 @@ void ShowProductsMenu(void) {
 
 
 /**
- * @brief prints products submenu and allows to select an option.
+ * @brief Pide una clave y un título y llama a addTableEntry.
  */
-int ShowProductsSubMenu(void) {
-    return 0;
-}
-
-
-/**
- * @brief Shows and processes the orders menu.
- */
-void ShowOrdersMenu(void) {
+void insertTableEntry(void) {
     char key[BufferLength];
     char title[BufferLength];
     Book book;
@@ -161,17 +150,9 @@ void ShowOrdersMenu(void) {
 
 
 /**
- * @brief prints the orders submenu and allows to select an option.
+ * @brief Pide la profundidad e imprime el índice con printTree.
  */
-int ShowOrdersSubMenu(void) {
-    return 0;
-}
-
-
-/**
- * @brief Shows and processes the customers menu.
- */
-void ShowCustomersMenu(void) {
+void printIndexTree(void) {
     char levelText[32];
     int level;
 
@@ -188,12 +169,4 @@ void ShowCustomersMenu(void) {
     }
 
     printTree((size_t)level, selectedIndex);
-}
-
-
-/**
- * @brief prints the customers submenu and allows to select an option.
- */
-int ShowCustomersSubMenu(void) {
-    return 0;
 }
