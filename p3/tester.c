@@ -24,6 +24,7 @@ void checkPrint(const char * indexName);
 void createTestIndexFile(const char * indexName);
 void checkFindKey(const char * indexName);
 void checkAddIndexEntry(const char * indexName);
+void checkAddTableEntry(const char *tableName, const char *indexName);
 
 Node a[TEST_ARRAY_SIZE];
 char sort_a[SORTED_TEST_ARRAY_SIZE][PK_SIZE+1];
@@ -49,6 +50,7 @@ int main() {
     checkPrint(indexName);
     checkFindKey(indexName);
     checkAddIndexEntry(indexName);
+    checkAddTableEntry(tableName, indexName);
 #ifdef NEVERDEFINED
 #endif
     return (0);

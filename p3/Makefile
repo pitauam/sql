@@ -7,7 +7,7 @@ HEADERS = utils.h
 
 EXE = tester
 OBJ = $(EXE).o utils.o checkUtils.o checkCreateTable.o checkReplaceExtensionByIdx.o \
-checkCreateIndex.o checkPrint.o checkFindKey.o checkAddIndexEntry.o
+checkCreateIndex.o checkPrint.o checkFindKey.o checkAddIndexEntry.o checkAddTableEntry.o
 #all : $(EXE)
 
 
@@ -26,7 +26,7 @@ clean :
 		test.idx test_table.dat test_table.idx \
 		test_print.idx test_find_key.idx test_add_index_entry.idx \
 		test_add_table_entry.dat test_add_table_entry.idx \
-		myDataBase.dat myDataBase.idx file.txt interface
+		myDataBase.dat myDataBase.idx file.txt interface test_check_add_table_entry
 
 # a partir de aqui son todos tests individuales
 
@@ -64,7 +64,11 @@ test_add_index_entry:
 	./$@
 
 test_add_table_entry:
-	$(CC) $(CFLAGS) -o $@ test_add_table_entry.c utils.c
+	$(CC) $(CFLAGS) -o $@ test_add_table_entry.c checkAddTableEntry.c utils.c
+	./$@
+
+test_check_add_table_entry:
+	$(CC) $(CFLAGS) -o $@ test_add_table_entry.c checkAddTableEntry.c utils.c
 	./$@
 
 alltests:
@@ -75,6 +79,7 @@ alltests:
 	make test_find_key
 	make test_add_index_entry
 	make test_add_table_entry
+	make test_check_add_table_entry
 
 interface: interface.c utils.c utils.h
 	$(CC) $(CFLAGS) -o interface interface.c utils.c
